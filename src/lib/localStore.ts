@@ -72,6 +72,12 @@ export function clearActivities(): void {
   localStorage.removeItem(KEYS.activities);
 }
 
+export function updateDuration(newDuration: number): void {
+  const sched = getSchedule();
+  if (!sched) return;
+  write(KEYS.schedule, { ...sched, duration: newDuration });
+}
+
 export function updateStartDate(newDate: string): void {
   const sched = getSchedule();
   if (!sched) return;

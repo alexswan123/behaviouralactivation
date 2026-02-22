@@ -222,7 +222,7 @@ export default function CataloguePage() {
             setPastToAdd(null);
           }}
           onClose={() => { setSelectedActivity(null); setPastToAdd(null); }}
-          maxDay={10}
+          maxDay={schedule?.duration ?? 10}
         />
       )}
 

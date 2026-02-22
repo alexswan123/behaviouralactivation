@@ -9,6 +9,7 @@ import {
   patchActivity,
   removeActivity,
   updateStartDate,
+  updateDuration,
   clearAll,
   clearActivities,
 } from '../lib/localStore';
@@ -28,11 +29,12 @@ export function useSchedule() {
     setLoading(false);
   }, []);
 
-  const createSchedule = useCallback(async (startDate: Date): Promise<Schedule> => {
+  const createSchedule = useCallback(async (startDate: Date, duration = 10): Promise<Schedule> => {
     const sched: Schedule = {
       id: crypto.randomUUID(),
       session_id: 'local',
       start_date: format(startDate),
+      duration,
       created_at: new Date().toISOString(),
     };
     saveSchedule(sched);
@@ -109,6 +111,12 @@ export function useSchedule() {
     setActivities([]);
   }, []);
 
+  const changeDuration = useCallback((newDuration: number): void => {
+    updateDuration(newDuration);
+    const sched = getSchedule();
+    setSchedule(sched);
+  }, []);
+
   return {
     schedule,
     activities,
@@ -119,6 +127,7 @@ export function useSchedule() {
     updateActivity,
     deleteActivity,
     changeStartDate,
+    changeDuration,
     resetSchedule,
     resetActivitiesOnly,
   };

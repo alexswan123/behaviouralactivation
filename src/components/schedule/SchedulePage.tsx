@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X, Timer } from 'lucide-react';
 import { spell } from '../../lib/spelling';
 import { useSchedule } from '../../hooks/useSchedule';
 import DayCard from './DayCard';
@@ -8,15 +8,18 @@ import TodayFocus from './TodayFocus';
 import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
 
-type DialogMode = 'changeDate' | 'reset' | null;
+const DURATION_OPTIONS = [10, 14, 21, 30];
+
+type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | null;
 
 export default function SchedulePage() {
   const navigate = useNavigate();
-  const { schedule, activities, loading, error, addActivity, updateActivity, deleteActivity, changeStartDate, resetSchedule, resetActivitiesOnly } = useSchedule();
+  const { schedule, activities, loading, error, addActivity, updateActivity, deleteActivity, changeStartDate, changeDuration, resetSchedule, resetActivitiesOnly } = useSchedule();
   const [showExport, setShowExport] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dialog, setDialog] = useState<DialogMode>(null);
   const [newDateValue, setNewDateValue] = useState('');
+  const [newDuration, setNewDuration] = useState(10);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu on outside click
@@ -58,7 +61,7 @@ export default function SchedulePage() {
           onClick={() => navigate('/')}
           className="flex items-center gap-2 mx-auto bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors"
         >
-          Start my 10 days
+          Start my {spell.programme.toLowerCase()}
           <ArrowRight size={18} />
         </button>
       </div>
@@ -68,7 +71,9 @@ export default function SchedulePage() {
   const completedCount = activities.filter(a => a.completed).length;
   const totalPlanned = activities.length;
 
-  const days = Array.from({ length: 10 }, (_, i) => {
+  const duration = schedule.duration ?? 10;
+
+  const days = Array.from({ length: duration }, (_, i) => {
     const dayNumber = i + 1;
     const date = format(addDays(new Date(schedule.start_date + 'T00:00:00'), i));
     const dayActivities = activities.filter(a => a.day_number === dayNumber);
@@ -95,12 +100,23 @@ export default function SchedulePage() {
     setMenuOpen(false);
   };
 
+  const handleChangeDuration = () => {
+    setNewDuration(schedule.duration ?? 10);
+    setDialog('changeDuration');
+    setMenuOpen(false);
+  };
+
+  const handleConfirmChangeDuration = () => {
+    changeDuration(newDuration);
+    setDialog(null);
+  };
+
   return (
     <div>
       {/* Summary bar */}
       <div className="bg-[#3D5A4C] rounded-2xl p-6 mb-8 flex items-center justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-white">My 10-day {spell.programme.toLowerCase()}</h1>
+          <h1 className="text-2xl font-bold text-white">My {duration}-day {spell.programme.toLowerCase()}</h1>
           <p className="text-[#A8C8B0] text-sm mt-1">
             Starting {new Date(schedule.start_date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}
           </p>
@@ -152,6 +168,14 @@ export default function SchedulePage() {
                 </button>
                 <div className="h-px bg-[#EDE8E0]" />
                 <button
+                  onClick={handleChangeDuration}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
+                >
+                  <Timer size={15} className="text-[#7D9B76]" />
+                  Change programme length
+                </button>
+                <div className="h-px bg-[#EDE8E0]" />
+                <button
                   onClick={handleResetMenu}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#9B3A45] hover:bg-[#FDE8E8] transition-colors text-left"
                 >
@@ -173,6 +197,7 @@ export default function SchedulePage() {
           onAdd={addActivity}
           onUpdate={updateActivity}
           onDelete={deleteActivity}
+          maxDay={duration}
         />
       )}
 
@@ -187,6 +212,7 @@ export default function SchedulePage() {
             onAdd={addActivity}
             onUpdate={updateActivity}
             onDelete={deleteActivity}
+            maxDay={duration}
           />
         ))}
       </div>
@@ -232,6 +258,55 @@ export default function SchedulePage() {
                   className="flex-1 py-3 rounded-xl bg-[#3D5A4C] text-white text-sm font-semibold hover:bg-[#2A3D32] disabled:opacity-40 transition-colors"
                 >
                   Update dates
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Change programme length dialog */}
+      {dialog === 'changeDuration' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-[#DDD8D0]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8E0]">
+              <h2 className="font-semibold text-[#2A3D32]">Change programme length</h2>
+              <button onClick={() => setDialog(null)} className="p-1.5 rounded-lg hover:bg-[#F0EBE3] text-[#9E9B97]">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-[#8A8680]">
+                Extending adds more days to your schedule. Shortening will hide days beyond the new limit but won't delete any activities.
+              </p>
+              <div className="grid grid-cols-4 gap-2">
+                {DURATION_OPTIONS.map(opt => (
+                  <button
+                    key={opt}
+                    onClick={() => setNewDuration(opt)}
+                    className={`flex flex-col items-center py-3 rounded-xl border-2 text-xs font-medium transition-colors ${
+                      newDuration === opt
+                        ? 'border-[#3D5A4C] bg-[#F0F7EE] text-[#3D5A4C]'
+                        : 'border-[#EDE8E0] text-[#8A8680] hover:border-[#7D9B76] hover:text-[#3D5A4C]'
+                    }`}
+                  >
+                    <span className="font-bold text-base">{opt}</span>
+                    <span>days</span>
+                  </button>
+                ))}
+              </div>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => setDialog(null)}
+                  className="flex-1 py-3 rounded-xl border border-[#EDE8E0] text-[#5C5A57] text-sm font-medium hover:bg-[#F0EBE3] transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmChangeDuration}
+                  className="flex-1 py-3 rounded-xl bg-[#3D5A4C] text-white text-sm font-semibold hover:bg-[#2A3D32] transition-colors"
+                >
+                  Update
                 </button>
               </div>
             </div>

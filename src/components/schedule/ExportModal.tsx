@@ -21,15 +21,16 @@ function buildPlainText(schedule: Schedule, activities: ScheduledActivity[]): st
   const startDate = new Date(schedule.start_date + 'T00:00:00');
   const startLabel = startDate.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
   const score = (v: number | null) => v === null ? '—' : String(v);
+  const duration = schedule.duration ?? 10;
 
   const lines = [
-    `BLOOM — My 10-Day ${spell.programme}`,
+    `BLOOM — My ${duration}-Day ${spell.programme}`,
     `Started: ${startLabel}`,
     `Exported: ${new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })}`,
     '', '─'.repeat(48), '',
   ];
 
-  for (let day = 1; day <= 10; day++) {
+  for (let day = 1; day <= duration; day++) {
     const dayDate = new Date(startDate);
     dayDate.setDate(dayDate.getDate() + day - 1);
     const dayLabel = dayDate.toLocaleDateString('en-AU', { weekday: 'short', day: 'numeric', month: 'short' });
