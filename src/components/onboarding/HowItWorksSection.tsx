@@ -14,7 +14,7 @@ export default function HowItWorksSection() {
         </div>
         <p className="text-[#5C5A57] mb-5">
           When we feel low, we naturally pull back from life. We stop doing things we used to
-          enjoy, avoid seeing people, and let responsibilities pile up. It feels like rest —
+          enjoy, avoid seeing people, and let responsibilities pile up. It feels like rest,
           but it often makes things worse.
         </p>
         <div className="bg-[#FAF6F0] rounded-xl p-5">
@@ -47,7 +47,7 @@ export default function HowItWorksSection() {
         </div>
         <p className="text-[#5C5A57] mb-4">
           Behavioural activation (BA) turns the cycle around. Instead of waiting to feel better
-          before doing things, you do things — and mood improves as a result.
+          before doing things, you do things. And mood improves as a result.
         </p>
         <div className="bg-[#F0F7EE] rounded-xl p-5 border border-[#C8DCC4]">
           <p className="text-[#3D5A4C] font-semibold text-center mb-3">Act first. Mood follows.</p>
@@ -68,7 +68,7 @@ export default function HowItWorksSection() {
           </div>
         </div>
         <p className="text-[#9E9B97] text-sm mt-4">
-          Research shows that doing activities — even ones you don't feel like doing — reliably
+          Research shows that doing activities, even ones you don't feel like doing, reliably
           improves mood over time. You don't need to feel motivated first.
         </p>
       </section>
@@ -91,7 +91,7 @@ export default function HowItWorksSection() {
               letter: 'A',
               name: 'Achievement',
               colour: 'bg-[#FFF0DC] text-[#7B4A10]',
-              desc: 'The sense of getting something done — finishing a task, taking a step forward, showing up for yourself. It doesn\'t have to be big.',
+              desc: 'The sense of getting something done. Finishing a task, taking a step forward, showing up for yourself. It doesn\'t have to be big.',
             },
             {
               letter: 'C',
@@ -103,7 +103,7 @@ export default function HowItWorksSection() {
               letter: 'E',
               name: 'Enjoyment',
               colour: 'bg-[#FDE8E8] text-[#9B3A45]',
-              desc: 'Pleasure, fun, and sensory delight. Things that make life feel worth living — even in small doses.',
+              desc: 'Pleasure, fun, and sensory delight. Things that make life feel worth living, even in small doses.',
             },
           ].map(({ letter, name, colour, desc }) => (
             <div key={letter} className="flex gap-4">

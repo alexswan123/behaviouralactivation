@@ -70,7 +70,7 @@ export default function ProgressPage() {
           {3 - completedActivities.length === 1 ? 'activity' : 'activities'} to see your progress charts.
         </p>
         <p className="text-sm text-[#C8C4BE] mb-8">
-          You've completed {completedActivities.length} so far — keep going!
+          You've completed {completedActivities.length} so far. Keep going!
         </p>
         <button
           onClick={() => navigate('/schedule')}
@@ -134,7 +134,7 @@ export default function ProgressPage() {
 
       {/* Chart: Expected vs actual per activity */}
       <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
-        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual — Achievement</h2>
+        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual: Achievement</h2>
         <p className="text-xs text-[#9E9B97] mb-5">How your predictions compared to reality</p>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={stats!.chartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
@@ -153,7 +153,7 @@ export default function ProgressPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
-        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual — Connection</h2>
+        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual: Connection</h2>
         <p className="text-xs text-[#9E9B97] mb-5">How connected you expected to feel vs how you actually felt</p>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={stats!.chartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
@@ -172,7 +172,7 @@ export default function ProgressPage() {
       </div>
 
       <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
-        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual — Enjoyment</h2>
+        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual: Enjoyment</h2>
         <p className="text-xs text-[#9E9B97] mb-5">Often we enjoy things more than we expect to</p>
         <ResponsiveContainer width="100%" height={240}>
           <BarChart data={stats!.chartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
@@ -191,7 +191,7 @@ export default function ProgressPage() {
       </div>
 
       <p className="text-sm text-[#9E9B97] text-center pb-4">
-        Keep going — the more activities you log, the clearer the picture becomes.
+        Keep going. The more activities you log, the clearer the picture becomes.
       </p>
     </div>
   );

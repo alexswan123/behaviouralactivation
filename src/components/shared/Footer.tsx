@@ -63,7 +63,7 @@ function LegalModal({ initialTab, onClose }: { initialTab: LegalTab; onClose: ()
               <p>Your privacy matters to us. Bloom is designed so that your data stays with you.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">No accounts, no servers</h3>
-              <p>Bloom does not require you to create an account or log in. All of your schedule data — activities, ACE scores, notes — is stored only on your device using your browser's local storage. Nothing is transmitted to any server.</p>
+              <p>Bloom does not require you to create an account or log in. All of your schedule data (activities, ACE scores, notes) is stored only on your device using your browser's local storage. Nothing is transmitted to any server.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">What we store</h3>
               <p>The only data stored is what you enter into Bloom: your schedule start date, planned activities, and any ACE scores or notes you record. This data lives entirely in your browser and is not accessible to us.</p>
@@ -105,7 +105,7 @@ export default function Footer() {
                 <span className="font-bold text-[#3D5A4C]">Bloom</span>
               </div>
               <p className="text-sm text-[#8A8680] leading-relaxed">
-                Low mood shrinks your world. Bloom helps you slowly expand it again — one activity, one day at a time.
+                Low mood shrinks your world. Bloom helps you slowly expand it again, one activity at a time.
               </p>
             </div>
 

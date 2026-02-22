@@ -35,8 +35,7 @@ export default function ClinicianPage() {
           A free tool for referring clients to behavioural activation
         </h1>
         <p className="text-[#C4D9C8] text-base leading-relaxed max-w-xl">
-          Bloom was built by a psychologist and a developer to make BA more accessible — a structured,
-          evidence-based tool your clients can use between sessions, at no cost.
+          Bloom was built to make BA more accessible: a structured, evidence-based tool your clients can use between sessions, at no cost.
         </p>
       </div>
 
@@ -45,7 +44,7 @@ export default function ClinicianPage() {
         <SectionHeading>What Bloom does</SectionHeading>
         <p className="text-[#6B6866] leading-relaxed mb-6">
           Bloom guides clients through a 10-day behavioural activation program.
-          It draws on the core BA model — scheduling values-consistent activities, tracking
+          It draws on the core BA model: scheduling values-consistent activities, tracking
           Achievement, Connection, and Enjoyment (ACE) before and after each activity,
           and reviewing progress over time. Everything runs in the browser with no account required.
         </p>
@@ -55,7 +54,7 @@ export default function ClinicianPage() {
             and time slots.
           </Card>
           <Card icon={<BookOpen size={18} className="text-[#5C7A55]" />} title="Curated activity catalogue">
-            60 activities across Pleasure, Social, Achievement, and Body — with space for clients
+            60 activities across Pleasure, Social, Achievement, and Body, with space for clients
             to add their own or record things they used to enjoy.
           </Card>
           <Card icon={<BarChart2 size={18} className="text-[#5C7A55]" />} title="Pre and post ACE ratings">
@@ -64,7 +63,7 @@ export default function ClinicianPage() {
           </Card>
           <Card icon={<FileDown size={18} className="text-[#5C7A55]" />} title="Printable & exportable">
             Clients can download a PDF summary, export to their calendar (.ics),
-            or copy their schedule as text — useful for session review.
+            or copy their schedule as text. Useful for session review.
           </Card>
         </div>
       </div>
@@ -77,7 +76,7 @@ export default function ClinicianPage() {
             {
               n: '1',
               title: 'Share the link',
-              detail: 'Send clients to this site. No sign-up or account needed — they start immediately. Works on mobile and desktop.',
+              detail: 'Send clients to this site. No sign-up or account needed. They start immediately. Works on mobile and desktop.',
             },
             {
               n: '2',
@@ -92,7 +91,7 @@ export default function ClinicianPage() {
             {
               n: '4',
               title: 'Encourage pre-activity ratings',
-              detail: 'Pre-activity expected scores are clinically meaningful — research shows anticipated pleasure predicts depression improvement. Prompt clients to rate before, not just after.',
+              detail: 'Pre-activity expected scores are clinically meaningful. Research shows anticipated pleasure predicts depression improvement. Prompt clients to rate before, not just after.',
             },
             {
               n: '5',
@@ -123,8 +122,8 @@ export default function ClinicianPage() {
             cycle: low mood leads to avoidance, which reduces access to reinforcement, which deepens low mood.
           </p>
           <p>
-            BA works by scheduling approach behaviours — particularly activities associated with mastery
-            and pleasure — regardless of current motivation. The ACE framework (Achievement, Connection,
+            BA works by scheduling approach behaviours, particularly activities associated with mastery
+            and pleasure, regardless of current motivation. The ACE framework (Achievement, Connection,
             Enjoyment) maps onto the main reinforcer categories targeted in BA.
           </p>
           <p>
@@ -151,7 +150,7 @@ export default function ClinicianPage() {
             <p className="text-sm text-[#6B6866] leading-relaxed">
               Bloom is and will always be free for clients to use. If you're a clinician who
               finds yourself referring to it regularly, buying us a coffee is a kind way to
-              help keep it going. No pressure at all — just appreciated.
+              help keep it going. No pressure at all, just appreciated.
             </p>
           </div>
           <a

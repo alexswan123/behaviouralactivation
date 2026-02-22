@@ -251,7 +251,7 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
               <div className="mt-2 bg-white border border-[#EDE8E0] rounded-xl px-4 py-1 divide-y divide-[#EDE8E0]">
                 <PlatformBadge
                   label="Apple Calendar (iOS / macOS)"
-                  detail="Tap the downloaded file — your calendar app opens automatically and asks to import."
+                  detail="Tap the downloaded file. Your calendar app opens automatically and asks to import."
                 />
                 <PlatformBadge
                   label="Google Calendar"

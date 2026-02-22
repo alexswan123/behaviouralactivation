@@ -258,7 +258,7 @@ export default function SchedulePage() {
                 className="w-full text-left px-4 py-3.5 rounded-xl border-2 border-[#EDE8E0] hover:border-[#C17C5A] hover:bg-[#FFF5EE] transition-colors"
               >
                 <p className="text-sm font-semibold text-[#3D5A4C]">Clear all planned activities</p>
-                <p className="text-xs text-[#8A8680] mt-0.5">Keeps your start date — wipe the slate clean</p>
+                <p className="text-xs text-[#8A8680] mt-0.5">Keeps your start date, wipes the slate clean</p>
               </button>
               <button
                 onClick={() => { resetSchedule(); navigate('/'); }}

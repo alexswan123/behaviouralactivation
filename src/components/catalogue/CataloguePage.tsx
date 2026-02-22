@@ -68,7 +68,7 @@ export default function CataloguePage() {
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-[#2A3D32] mb-2">Activity catalogue</h1>
         <p className="text-[#8A8680] text-base">
-          {filtered.length} activities — click any to add it to your schedule
+          {filtered.length} activities. Click any to add it to your schedule.
         </p>
       </div>
 
@@ -86,7 +86,7 @@ export default function CataloguePage() {
               <p className="font-semibold text-[#2A3D32] text-sm">Things I enjoy</p>
               <p className="text-xs text-[#8A8680]">
                 {pastItems.length === 0
-                  ? 'Activities you enjoy or want to do more of — quick to add to your schedule'
+                  ? 'Activities you enjoy or want to do more of, quick to add to your schedule'
                   : `${pastItems.length} thing${pastItems.length === 1 ? '' : 's'} saved`}
               </p>
             </div>
@@ -97,7 +97,7 @@ export default function CataloguePage() {
         {pastExpanded && (
           <div className="px-6 pb-5 border-t border-[#EDE8E0]">
             <p className="text-sm text-[#8A8680] mt-4 mb-4 leading-relaxed">
-              Keep a personal list of activities that bring you joy — small or big.
+              Keep a personal list of activities that bring you joy, small or big.
               Tap any item to add it to your schedule.
             </p>
 
