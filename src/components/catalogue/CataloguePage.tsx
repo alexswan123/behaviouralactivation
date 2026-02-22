@@ -83,10 +83,10 @@ export default function CataloguePage() {
               <span className="text-[#C17C5A] text-base">✦</span>
             </div>
             <div className="text-left">
-              <p className="font-semibold text-[#2A3D32] text-sm">Things I used to enjoy</p>
+              <p className="font-semibold text-[#2A3D32] text-sm">Things I enjoy</p>
               <p className="text-xs text-[#8A8680]">
                 {pastItems.length === 0
-                  ? 'Jot down small activities from before — things to aim for again'
+                  ? 'Activities you enjoy or want to do more of — quick to add to your schedule'
                   : `${pastItems.length} thing${pastItems.length === 1 ? '' : 's'} saved`}
               </p>
             </div>
@@ -97,15 +97,15 @@ export default function CataloguePage() {
         {pastExpanded && (
           <div className="px-6 pb-5 border-t border-[#EDE8E0]">
             <p className="text-sm text-[#8A8680] mt-4 mb-4 leading-relaxed">
-              Depression often pulls us away from activities we used to love — even small ones.
-              Write them down here as targets, then add them to your schedule when you're ready.
+              Keep a personal list of activities that bring you joy — small or big.
+              Tap any item to add it to your schedule.
             </p>
 
             {/* Input */}
             <div className="flex gap-2 mb-4">
               <input
                 type="text"
-                placeholder="e.g. evening walks, painting, calling a friend…"
+                placeholder="e.g. evening walks, cooking, calling a friend…"
                 value={pastInput}
                 onChange={e => setPastInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddPast()}

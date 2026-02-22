@@ -4,6 +4,7 @@ import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, 
 import { spell } from '../../lib/spelling';
 import { useSchedule } from '../../hooks/useSchedule';
 import DayCard from './DayCard';
+import TodayFocus from './TodayFocus';
 import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
 
@@ -73,6 +74,9 @@ export default function SchedulePage() {
     const dayActivities = activities.filter(a => a.day_number === dayNumber);
     return { dayNumber, date, dayActivities };
   });
+
+  const todayStr = new Date().toISOString().split('T')[0];
+  const todayDay = days.find(d => d.date === todayStr) ?? null;
 
   const handleChangeDate = () => {
     setNewDateValue(schedule.start_date);
@@ -159,6 +163,18 @@ export default function SchedulePage() {
           </div>
         </div>
       </div>
+
+      {/* Today focus */}
+      {todayDay && (
+        <TodayFocus
+          dayNumber={todayDay.dayNumber}
+          date={todayDay.date}
+          activities={todayDay.dayActivities}
+          onAdd={addActivity}
+          onUpdate={updateActivity}
+          onDelete={deleteActivity}
+        />
+      )}
 
       {/* Day grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">

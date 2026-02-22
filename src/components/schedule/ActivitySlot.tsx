@@ -8,10 +8,11 @@ interface ActivitySlotProps {
   activity: ScheduledActivity;
   onUpdate: (id: string, updates: Partial<ScheduledActivity>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  initialExpanded?: boolean;
 }
 
-export default function ActivitySlot({ activity, onUpdate, onDelete }: ActivitySlotProps) {
-  const [expanded, setExpanded] = useState(false);
+export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpanded = false }: ActivitySlotProps) {
+  const [expanded, setExpanded] = useState(initialExpanded);
   const [saving, setSaving] = useState(false);
   const [showPostScores, setShowPostScores] = useState(activity.completed);
 

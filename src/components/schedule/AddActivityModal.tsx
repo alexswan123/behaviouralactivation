@@ -162,7 +162,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                 <div>
                   <div className="flex items-center gap-2 mb-2">
                     <Sparkles size={13} className="text-[#C17C5A]" />
-                    <span className="text-xs font-semibold text-[#C17C5A] uppercase tracking-wide">Things I used to enjoy</span>
+                    <span className="text-xs font-semibold text-[#C17C5A] uppercase tracking-wide">Things I enjoy</span>
                   </div>
                   <div className="space-y-1.5">
                     {filteredPast.map(item => (
