@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
+  <!-- Background -->
+  <rect width="1200" height="630" fill="#3D5A4C"/>
+
+  <!-- Subtle texture circles -->
+  <circle cx="980" cy="120" r="300" fill="#2A3D32" opacity="0.4"/>
+  <circle cx="1100" cy="520" r="200" fill="#2A3D32" opacity="0.3"/>
+  <circle cx="60" cy="540" r="180" fill="#2A3D32" opacity="0.25"/>
+
+  <!-- Logo icon background -->
+  <rect x="80" y="80" width="80" height="80" rx="20" fill="#7D9B76"/>
+
+  <!-- Leaf icon (centred in the icon box) -->
+  <g transform="translate(120, 120)">
+    <path d="M0,-22 C10,-22 22,-10 22,4 C22,16 12,26 0,28 C-12,26 -22,16 -22,4 C-22,-10 -10,-22 0,-22 Z" fill="#FAF6F0" opacity="0.95"/>
+    <line x1="0" y1="-18" x2="0" y2="26" stroke="#7D9B76" stroke-width="1.8" stroke-linecap="round"/>
+    <line x1="0" y1="0" x2="12" y2="-10" stroke="#7D9B76" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="0" y1="8" x2="-10" y2="0" stroke="#7D9B76" stroke-width="1.2" stroke-linecap="round"/>
+  </g>
+
+  <!-- Bloom wordmark -->
+  <text x="80" y="240" font-family="Georgia, serif" font-size="96" font-weight="700" fill="#FAF6F0" letter-spacing="-2">Bloom</text>
+
+  <!-- Tagline -->
+  <text x="80" y="300" font-family="Arial, Helvetica, sans-serif" font-size="28" fill="#A8C8B0" letter-spacing="0.5">Small steps. Real change.</text>
+
+  <!-- Divider -->
+  <rect x="80" y="340" width="60" height="3" rx="2" fill="#7D9B76"/>
+
+  <!-- Description -->
+  <text x="80" y="395" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#C8DDD0">A free behavioural activation tool.</text>
+  <text x="80" y="428" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#C8DDD0">Plan activities. Track your mood. Feel better.</text>
+
+  <!-- URL badge -->
+  <rect x="80" y="510" width="380" height="46" rx="10" fill="#2A3D32" opacity="0.6"/>
+  <text x="270" y="539" font-family="Arial, Helvetica, sans-serif" font-size="18" fill="#A8C8B0" text-anchor="middle" letter-spacing="0.3">behaviouralactivation.com.au</text>
+</svg>
