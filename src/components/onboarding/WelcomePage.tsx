@@ -54,7 +54,7 @@ export default function WelcomePage() {
               <ArrowRight size={20} />
             </button>
           ) : showDatePicker && !schedule ? (
-            <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm">
+            <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm mx-4">
               <p className="text-[#3D5A4C] font-semibold mb-3">When does Day 1 start?</p>
               <input
                 type="date"
@@ -85,13 +85,13 @@ export default function WelcomePage() {
       </div>
 
       {/* ACE Quick explainer */}
-      <div className="grid grid-cols-3 gap-4 mb-16 px-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-16 px-4">
         {[
           { icon: Zap, label: 'Achievement', colour: 'bg-[#FFF0DC] text-[#7B4A10]', desc: 'Getting things done' },
           { icon: Users, label: 'Connection', colour: 'bg-[#D8EDD8] text-[#2D5A3A]', desc: 'Feeling close to others' },
           { icon: Heart, label: 'Enjoyment', colour: 'bg-[#FDE8E8] text-[#9B3A45]', desc: 'Pleasure and fun' },
         ].map(({ icon: Icon, label, colour, desc }) => (
-          <div key={label} className="bg-white rounded-2xl border border-[#E8E4DE] p-5 text-center shadow-sm">
+          <div key={label} className="bg-white rounded-2xl border border-[#E8E4DE] p-3 sm:p-5 text-center shadow-sm min-w-0">
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 ${colour}`}>
               <Icon size={20} />
             </div>
