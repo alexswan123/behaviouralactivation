@@ -141,7 +141,8 @@ const s = StyleSheet.create({
   aceDataRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.border },
 
   // Cells — label col is wider to fit "Achievement" comfortably
-  aceLabelCol: { width: 84, paddingHorizontal: 8, paddingVertical: 3, justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
+  aceLabelCol:       { width: 84, flexShrink: 0, paddingHorizontal: 8, paddingVertical: 3, justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
+  aceLabelHeaderCol: { width: 84, flexShrink: 0, paddingHorizontal: 8, paddingVertical: 3, justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
   aceLabelText: { fontFamily: BOLD, fontSize: 8, color: C.forest },
   aceHeaderCol: { flex: 1, paddingHorizontal: 8, paddingVertical: 3, borderRightWidth: 1, borderRightColor: C.border, justifyContent: 'center' },
   aceHeaderColLast: { borderRightWidth: 0 },
@@ -350,9 +351,9 @@ function ActivityBlock({ act }: { act: ScheduledActivity }) {
 
       {/* ACE table — always shown so the printed form is always fillable */}
       <View style={s.aceTable}>
-        {/* Column headers — label col width matches aceLabelCol (84) */}
+        {/* Column headers */}
         <View style={s.aceHeaderRow}>
-          <View style={[s.aceHeaderCol, { width: 84, flex: 0 }]}><Text style={s.aceHeaderText}>ACE score</Text></View>
+          <View style={s.aceLabelHeaderCol}><Text style={s.aceHeaderText}>ACE score</Text></View>
           <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Expected (before)</Text></View>
           <View style={[s.aceHeaderCol, s.aceHeaderColLast]}><Text style={s.aceHeaderText}>Actual (after)</Text></View>
         </View>
