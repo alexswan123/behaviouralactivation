@@ -74,7 +74,7 @@ export function googleCalendarUrl(act: ScheduledActivity): string {
 
 // ── ICS file builder ──────────────────────────────────────────────────────────
 
-export function generateICS(schedule: Schedule, activities: ScheduledActivity[], programmeName: string): string {
+export function generateICS(_schedule: Schedule, activities: ScheduledActivity[], programmeName: string): string {
   const dtstamp = nowUtc();
 
   const events = activities.map(act => {
