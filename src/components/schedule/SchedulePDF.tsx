@@ -195,6 +195,24 @@ const s = StyleSheet.create({
   emptyDay: { paddingHorizontal: 12, paddingVertical: 10 },
   emptyDayText: { fontFamily: REG, fontSize: 8, color: C.border, fontStyle: 'italic' },
 
+  // ── Per-day mood check-in ──
+  dayMoodRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 12,
+    paddingVertical: 7,
+    borderTopWidth: 1,
+    borderTopColor: C.borderLight,
+    backgroundColor: C.cream,
+  },
+  dayMoodTitle: { fontFamily: BOLD, fontSize: 7, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 1 },
+  dayMoodGroup: { flexDirection: 'row', alignItems: 'center', gap: 8 },
+  dayMoodItem: { flexDirection: 'row', alignItems: 'center', gap: 4 },
+  dayMoodLabel: { fontFamily: REG, fontSize: 7.5, color: C.muted },
+  dayMoodField: { width: 26, height: 15, borderWidth: 1, borderColor: C.border, borderRadius: 2 },
+  dayMoodSlash: { fontFamily: REG, fontSize: 7.5, color: C.borderLight, marginHorizontal: 1 },
+
   // ── Divider ──
   divider: { height: 1, backgroundColor: C.borderLight, marginVertical: 8 },
 
@@ -328,9 +346,6 @@ function AceLift({ pre, post, sub }: { pre: number | null; post: number | null; 
 
 function ActivityBlock({ act }: { act: ScheduledActivity }) {
   const cat = act.category ? catColour[act.category] : null;
-  const hasPre  = act.pre_achievement  !== null || act.pre_connection  !== null || act.pre_enjoyment  !== null;
-  const hasPost = act.post_achievement !== null || act.post_connection !== null || act.post_enjoyment !== null;
-  const showLift = hasPre && hasPost;
   const catLabel = act.category ? act.category.charAt(0).toUpperCase() + act.category.slice(1) : null;
 
   return (
@@ -348,41 +363,40 @@ function ActivityBlock({ act }: { act: ScheduledActivity }) {
         )}
       </View>
 
-      {(hasPre || hasPost) && (
-        <View style={s.aceTable}>
-          {/* Column headers */}
-          <View style={s.aceHeaderRow}>
-            <View style={[s.aceHeaderCol, { width: 72, flex: 0 }]}><Text style={s.aceHeaderText}> </Text></View>
-            {hasPre  && <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Expected</Text></View>}
-            {hasPost && <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Actual</Text></View>}
-            {showLift && <View style={[s.aceHeaderCol, s.aceHeaderColLast]}><Text style={s.aceHeaderText}>Lift</Text></View>}
-          </View>
-
-          {/* Achievement row */}
-          <View style={s.aceDataRow}>
-            <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Achievement</Text></View>
-            {hasPre  && <AceScore value={act.pre_achievement}  sub="A" />}
-            {hasPost && <AceScore value={act.post_achievement} sub="A" />}
-            {showLift && <AceLift pre={act.pre_achievement} post={act.post_achievement} sub="A" />}
-          </View>
-
-          {/* Connection row */}
-          <View style={s.aceDataRow}>
-            <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Connection</Text></View>
-            {hasPre  && <AceScore value={act.pre_connection}  sub="C" />}
-            {hasPost && <AceScore value={act.post_connection} sub="C" />}
-            {showLift && <AceLift pre={act.pre_connection} post={act.post_connection} sub="C" />}
-          </View>
-
-          {/* Enjoyment row */}
-          <View style={s.aceDataRow}>
-            <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Enjoyment</Text></View>
-            {hasPre  && <AceScore value={act.pre_enjoyment}  sub="E" />}
-            {hasPost && <AceScore value={act.post_enjoyment} sub="E" />}
-            {showLift && <AceLift pre={act.pre_enjoyment} post={act.post_enjoyment} sub="E" />}
-          </View>
+      {/* ACE table — always shown so the printed form is always fillable */}
+      <View style={s.aceTable}>
+        {/* Column headers */}
+        <View style={s.aceHeaderRow}>
+          <View style={[s.aceHeaderCol, { width: 72, flex: 0 }]}><Text style={s.aceHeaderText}> </Text></View>
+          <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Expected (before)</Text></View>
+          <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Actual (after)</Text></View>
+          <View style={[s.aceHeaderCol, s.aceHeaderColLast]}><Text style={s.aceHeaderText}>Lift</Text></View>
         </View>
-      )}
+
+        {/* Achievement row */}
+        <View style={s.aceDataRow}>
+          <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Achievement</Text></View>
+          <AceScore value={act.pre_achievement}  sub="A" />
+          <AceScore value={act.post_achievement} sub="A" />
+          <AceLift  pre={act.pre_achievement} post={act.post_achievement} sub="A" />
+        </View>
+
+        {/* Connection row */}
+        <View style={s.aceDataRow}>
+          <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Connection</Text></View>
+          <AceScore value={act.pre_connection}  sub="C" />
+          <AceScore value={act.post_connection} sub="C" />
+          <AceLift  pre={act.pre_connection} post={act.post_connection} sub="C" />
+        </View>
+
+        {/* Enjoyment row */}
+        <View style={s.aceDataRow}>
+          <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Enjoyment</Text></View>
+          <AceScore value={act.pre_enjoyment}  sub="E" />
+          <AceScore value={act.post_enjoyment} sub="E" />
+          <AceLift  pre={act.pre_enjoyment} post={act.post_enjoyment} sub="E" />
+        </View>
+      </View>
 
       {act.notes && (
         <View style={s.notesBox}>
@@ -430,6 +444,23 @@ function DayBlock({ dayNumber, dateStr, activities }: { dayNumber: number; dateS
           ))}
         </View>
       )}
+
+      {/* Per-day overall mood check-in — always printed for hand-filling */}
+      <View style={s.dayMoodRow}>
+        <Text style={s.dayMoodTitle}>Overall mood today</Text>
+        <View style={s.dayMoodGroup}>
+          <View style={s.dayMoodItem}>
+            <Text style={s.dayMoodLabel}>Before</Text>
+            <View style={s.dayMoodField} />
+            <Text style={s.dayMoodSlash}>/10</Text>
+          </View>
+          <View style={s.dayMoodItem}>
+            <Text style={s.dayMoodLabel}>After</Text>
+            <View style={s.dayMoodField} />
+            <Text style={s.dayMoodSlash}>/10</Text>
+          </View>
+        </View>
+      </View>
     </View>
   );
 }
@@ -611,12 +642,12 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
             {/* Score entry fields */}
             <View style={s.scoreFieldRow}>
               <View style={s.scoreField}>
-                <Text style={s.scoreFieldLabel}>Score before programme</Text>
+                <Text style={s.scoreFieldLabel}>Score before {spell.programme.toLowerCase()}</Text>
                 <Text style={s.scoreFieldValue}>___</Text>
                 <Text style={s.scoreFieldHint}>Date: ________________</Text>
               </View>
               <View style={s.scoreField}>
-                <Text style={s.scoreFieldLabel}>Score after programme</Text>
+                <Text style={s.scoreFieldLabel}>Score after {spell.programme.toLowerCase()}</Text>
                 <Text style={s.scoreFieldValue}>___</Text>
                 <Text style={s.scoreFieldHint}>Date: ________________</Text>
               </View>
