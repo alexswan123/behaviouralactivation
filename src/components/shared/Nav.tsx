@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, BookOpen, BarChart2, Leaf } from 'lucide-react';
+import { Calendar, BookOpen, BarChart2, Leaf, Stethoscope } from 'lucide-react';
 
 export default function Nav() {
   const linkClass = ({ isActive }: { isActive: boolean }) =>
@@ -30,6 +30,10 @@ export default function Nav() {
           <NavLink to="/progress" className={linkClass}>
             <BarChart2 size={15} />
             Progress
+          </NavLink>
+          <NavLink to="/for-clinicians" className={linkClass}>
+            <Stethoscope size={15} />
+            For clinicians
           </NavLink>
         </div>
       </div>

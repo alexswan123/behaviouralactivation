@@ -4,6 +4,7 @@ import WelcomePage from './components/onboarding/WelcomePage';
 import SchedulePage from './components/schedule/SchedulePage';
 import CataloguePage from './components/catalogue/CataloguePage';
 import ProgressPage from './components/progress/ProgressPage';
+import ClinicianPage from './components/clinicians/ClinicianPage';
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
           <Route path="/schedule" element={<SchedulePage />} />
           <Route path="/catalogue" element={<CataloguePage />} />
           <Route path="/progress" element={<ProgressPage />} />
+          <Route path="/for-clinicians" element={<ClinicianPage />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>
