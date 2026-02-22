@@ -168,25 +168,57 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
 
         <div className="overflow-y-auto flex-1 p-6 space-y-5">
 
-          {/* ── CALENDAR (primary) ─────────────────────────────────────── */}
+          {/* ── PDF (primary) ─────────────────────────────────────────── */}
           <div>
             <p className="text-xs font-semibold text-[#3D5A4C] uppercase tracking-wide mb-2">Recommended</p>
+            <button
+              onClick={handleDownloadPdf}
+              disabled={generatingPdf}
+              className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-[#3D5A4C] text-white hover:bg-[#2A3D32] disabled:opacity-60 transition-all group"
+            >
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center">
+                  <Download size={17} />
+                </div>
+                <div className="text-left">
+                  <p className="font-semibold text-sm">Download as PDF</p>
+                  <p className="text-xs text-[#A8C8B0]">
+                    {generatingPdf ? 'Generating…' : 'Schedule, ACE scores, progress notes'}
+                  </p>
+                </div>
+              </div>
+              {generatingPdf
+                ? <div className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                : <Download size={15} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+              }
+            </button>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="flex-1 h-px bg-[#E8E3DB]" />
+            <span className="text-xs text-[#ABA8A3]">or</span>
+            <div className="flex-1 h-px bg-[#E8E3DB]" />
+          </div>
+
+          {/* ── CALENDAR ──────────────────────────────────────────────── */}
+          <div>
+            <p className="text-xs font-semibold text-[#3D5A4C] uppercase tracking-wide mb-2">Add to calendar</p>
 
             {/* ICS download */}
             <button
               onClick={handleDownloadICS}
-              className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-[#3D5A4C] text-white hover:bg-[#2A3D32] transition-colors group"
+              className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white border-2 border-[#EDE8E0] hover:border-[#7D9B76] hover:bg-[#F2F7F1] transition-all group"
             >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-white/15 rounded-lg flex items-center justify-center">
-                  <CalendarDays size={17} />
+                <div className="w-9 h-9 bg-[#EDE8E0] group-hover:bg-[#D8EDD8] rounded-lg flex items-center justify-center transition-colors">
+                  <CalendarDays size={17} className="text-[#3D5A4C]" />
                 </div>
                 <div className="text-left">
-                  <p className="font-semibold text-sm">Add to calendar</p>
-                  <p className="text-xs text-[#A8C8B0]">{activities.length} events · {dateRange}</p>
+                  <p className="font-semibold text-sm text-[#3D5A4C]">Download .ics file</p>
+                  <p className="text-xs text-[#8A8680]">{activities.length} events · {dateRange}</p>
                 </div>
               </div>
-              <Download size={15} className="opacity-60 group-hover:opacity-100 transition-opacity" />
+              <Download size={15} className="text-[#ABA8A3] group-hover:text-[#7D9B76] transition-colors" />
             </button>
 
             {/* Works with chips */}
@@ -269,34 +301,6 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
               </>
             )}
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="flex-1 h-px bg-[#E8E3DB]" />
-            <span className="text-xs text-[#ABA8A3]">or</span>
-            <div className="flex-1 h-px bg-[#E8E3DB]" />
-          </div>
-
-          {/* ── PDF ───────────────────────────────────────────────────── */}
-          <button
-            onClick={handleDownloadPdf}
-            disabled={generatingPdf}
-            className="w-full flex items-center justify-between px-5 py-4 rounded-xl bg-white border-2 border-[#EDE8E0] hover:border-[#7D9B76] hover:bg-[#F2F7F1] disabled:opacity-60 transition-all group"
-          >
-            <div className="flex items-center gap-3">
-              <div className="w-9 h-9 bg-[#EDE8E0] group-hover:bg-[#D8EDD8] rounded-lg flex items-center justify-center transition-colors">
-                <Download size={17} className="text-[#3D5A4C]" />
-              </div>
-              <div className="text-left">
-                <p className="font-semibold text-sm text-[#3D5A4C]">Download as PDF</p>
-                <p className="text-xs text-[#8A8680]">
-                  {generatingPdf ? 'Generating…' : 'Full schedule with ACE scores & notes'}
-                </p>
-              </div>
-            </div>
-            {generatingPdf && (
-              <div className="w-4 h-4 border-2 border-[#7D9B76]/40 border-t-[#7D9B76] rounded-full animate-spin" />
-            )}
-          </button>
 
           {/* ── Email ─────────────────────────────────────────────────── */}
           <div>

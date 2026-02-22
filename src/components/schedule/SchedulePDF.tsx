@@ -140,28 +140,27 @@ const s = StyleSheet.create({
   aceHeaderRow: { flexDirection: 'row', backgroundColor: C.creamDark },
   aceDataRow: { flexDirection: 'row', borderTopWidth: 1, borderTopColor: C.border },
 
-  // Cells
-  aceLabelCol: { width: 72, paddingHorizontal: 8, paddingVertical: 6, justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
+  // Cells — label col is wider to fit "Achievement" comfortably
+  aceLabelCol: { width: 84, paddingHorizontal: 8, paddingVertical: 3, justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
   aceLabelText: { fontFamily: BOLD, fontSize: 8, color: C.forest },
-  aceHeaderCol: { flex: 1, paddingHorizontal: 8, paddingVertical: 5, borderRightWidth: 1, borderRightColor: C.border, justifyContent: 'center' },
+  aceHeaderCol: { flex: 1, paddingHorizontal: 8, paddingVertical: 3, borderRightWidth: 1, borderRightColor: C.border, justifyContent: 'center' },
   aceHeaderColLast: { borderRightWidth: 0 },
   aceHeaderText: { fontFamily: BOLD, fontSize: 7, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.4 },
-  aceScoreCol: { flex: 1, paddingHorizontal: 8, paddingVertical: 6, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
+  aceScoreCol: { flex: 1, paddingHorizontal: 6, paddingVertical: 3, alignItems: 'center', justifyContent: 'center', borderRightWidth: 1, borderRightColor: C.border },
   aceScoreColLast: { borderRightWidth: 0 },
-  aceScoreNum: { fontFamily: BOLD, fontSize: 13, color: C.forest },
+  aceScoreNum: { fontFamily: BOLD, fontSize: 11, color: C.forest },
   aceScoreNumEmpty: { color: C.borderLight },
-  aceScoreSubLabel: { fontFamily: REG, fontSize: 6.5, color: C.muted, marginTop: 1 },
+  aceScoreSubLabel: { fontFamily: REG, fontSize: 6, color: C.muted, marginTop: 1 },
   liftPos: { color: C.liftPos },
   liftNeg: { color: C.liftNeg },
 
   // ── Blank printable score box (fill in by hand) ──
   blankScoreBox: {
-    width: 22,
-    height: 17,
+    width: 18,
+    height: 13,
     borderWidth: 1,
     borderColor: '#C8C3BC',
-    borderRadius: 3,
-    marginBottom: 2,
+    borderRadius: 2,
   },
 
   // ── Wellbeing before/after section ──
@@ -316,30 +315,16 @@ const s = StyleSheet.create({
 
 // ─── Small components ────────────────────────────────────────────────────────
 
-function AceScore({ value, sub }: { value: number | null; sub: string }) {
+function AceScore({ value, sub, isLast }: { value: number | null; sub: string; isLast?: boolean }) {
   return (
-    <View style={[s.aceScoreCol]}>
+    <View style={[s.aceScoreCol, isLast ? s.aceScoreColLast : {}]}>
       {value === null
         ? <View style={s.blankScoreBox} />
-        : <Text style={s.aceScoreNum}>{String(value)}</Text>
+        : <>
+            <Text style={s.aceScoreNum}>{String(value)}</Text>
+            <Text style={s.aceScoreSubLabel}>{sub}</Text>
+          </>
       }
-      <Text style={s.aceScoreSubLabel}>{sub}</Text>
-    </View>
-  );
-}
-
-function AceLift({ pre, post, sub }: { pre: number | null; post: number | null; sub: string }) {
-  const valid = pre !== null && post !== null;
-  const lift = valid ? post! - pre! : null;
-  return (
-    <View style={[s.aceScoreCol, s.aceScoreColLast]}>
-      {!valid
-        ? <View style={s.blankScoreBox} />
-        : <Text style={[s.aceScoreNum, lift! > 0 ? s.liftPos : lift! < 0 ? s.liftNeg : {}]}>
-            {lift! > 0 ? `+${lift}` : String(lift)}
-          </Text>
-      }
-      <Text style={s.aceScoreSubLabel}>{sub}</Text>
     </View>
   );
 }
@@ -365,36 +350,32 @@ function ActivityBlock({ act }: { act: ScheduledActivity }) {
 
       {/* ACE table — always shown so the printed form is always fillable */}
       <View style={s.aceTable}>
-        {/* Column headers */}
+        {/* Column headers — label col width matches aceLabelCol (84) */}
         <View style={s.aceHeaderRow}>
-          <View style={[s.aceHeaderCol, { width: 72, flex: 0 }]}><Text style={s.aceHeaderText}> </Text></View>
+          <View style={[s.aceHeaderCol, { width: 84, flex: 0 }]}><Text style={s.aceHeaderText}>ACE score</Text></View>
           <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Expected (before)</Text></View>
-          <View style={s.aceHeaderCol}><Text style={s.aceHeaderText}>Actual (after)</Text></View>
-          <View style={[s.aceHeaderCol, s.aceHeaderColLast]}><Text style={s.aceHeaderText}>Lift</Text></View>
+          <View style={[s.aceHeaderCol, s.aceHeaderColLast]}><Text style={s.aceHeaderText}>Actual (after)</Text></View>
         </View>
 
         {/* Achievement row */}
         <View style={s.aceDataRow}>
           <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Achievement</Text></View>
           <AceScore value={act.pre_achievement}  sub="A" />
-          <AceScore value={act.post_achievement} sub="A" />
-          <AceLift  pre={act.pre_achievement} post={act.post_achievement} sub="A" />
+          <AceScore value={act.post_achievement} sub="A" isLast />
         </View>
 
         {/* Connection row */}
         <View style={s.aceDataRow}>
           <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Connection</Text></View>
           <AceScore value={act.pre_connection}  sub="C" />
-          <AceScore value={act.post_connection} sub="C" />
-          <AceLift  pre={act.pre_connection} post={act.post_connection} sub="C" />
+          <AceScore value={act.post_connection} sub="C" isLast />
         </View>
 
         {/* Enjoyment row */}
         <View style={s.aceDataRow}>
           <View style={s.aceLabelCol}><Text style={s.aceLabelText}>Enjoyment</Text></View>
           <AceScore value={act.pre_enjoyment}  sub="E" />
-          <AceScore value={act.post_enjoyment} sub="E" />
-          <AceLift  pre={act.pre_enjoyment} post={act.post_enjoyment} sub="E" />
+          <AceScore value={act.post_enjoyment} sub="E" isLast />
         </View>
       </View>
 
@@ -418,7 +399,7 @@ function DayBlock({ dayNumber, dateStr, activities }: { dayNumber: number; dateS
   const doneCount = activities.filter(a => a.completed).length;
 
   return (
-    <View style={[s.dayCard, isToday ? s.dayCardHighlight : {}]}>
+    <View wrap={false} style={[s.dayCard, isToday ? s.dayCardHighlight : {}]}>
       <View style={[s.dayHeader, isToday ? s.dayHeaderToday : {}]}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
           <Text style={[s.dayNumber, isToday ? s.dayNumberToday : {}]}>Day {dayNumber}</Text>
@@ -510,17 +491,17 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
     };
   });
 
-  const Footer = ({ n }: { n: number }) => (
+  const Footer = () => (
     <View style={s.footer} fixed>
       <Text style={s.footerBrand}>Bloom</Text>
       <Text style={s.footerText}>Exported {exportedLabel}</Text>
-      <Text style={s.footerPage}>Page {n}</Text>
+      <Text style={s.footerPage} render={({ pageNumber, totalPages }) => `Page ${pageNumber} of ${totalPages}`} />
     </View>
   );
 
   return (
     <Document title={`Bloom — My 10-Day ${spell.programme}`} author="Bloom">
-      {/* Page 1: header + stats + Days 1–5 */}
+      {/* Pages 1+: header + stats + all 10 days (auto-paginated) */}
       <Page size="A4" style={s.page}>
         <View style={s.coverHeader}>
           <View>
@@ -551,17 +532,13 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
 
         <Text style={s.sectionHeading}>Days 1 – 5</Text>
         {days.slice(0, 5).map(d => <DayBlock key={d.dayNumber} {...d} />)}
-        <Footer n={1} />
-      </Page>
-
-      {/* Page 2: Days 6–10 */}
-      <Page size="A4" style={s.page}>
+        <View break />
         <Text style={s.sectionHeading}>Days 6 – 10</Text>
         {days.slice(5).map(d => <DayBlock key={d.dayNumber} {...d} />)}
-        <Footer n={2} />
+        <Footer />
       </Page>
 
-      {/* Page 3: Depression score tracking & clinical notes */}
+      {/* Progress notes page */}
       <Page size="A4" style={s.page}>
         {/* Page header */}
         <View style={s.coverHeader}>
@@ -758,7 +735,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
           The PHQ-9 is a validated screening tool (Kroenke et al., 2001). A score reduction of ≥5 points is generally considered clinically meaningful. This document does not replace professional clinical assessment.
         </Text>
 
-        <Footer n={3} />
+        <Footer />
       </Page>
     </Document>
   );

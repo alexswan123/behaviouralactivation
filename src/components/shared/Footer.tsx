@@ -105,7 +105,7 @@ export default function Footer() {
                 <span className="font-bold text-[#3D5A4C]">Bloom</span>
               </div>
               <p className="text-sm text-[#8A8680] leading-relaxed">
-                A free behavioural activation tool made by a psychologist and developer to help people take small, meaningful steps.
+                Low mood shrinks your world. Bloom helps you slowly expand it again — one activity, one day at a time.
               </p>
             </div>
 
