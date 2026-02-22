@@ -1,0 +1,53 @@
+export type Category = 'pleasure' | 'social' | 'achievement' | 'body';
+
+export interface CatalogueActivity {
+  id: string;
+  name: string;
+  description: string;
+  category: Category;
+  group: string;
+}
+
+export interface ACEScores {
+  achievement: number | null;
+  connection: number | null;
+  enjoyment: number | null;
+}
+
+export interface ScheduledActivity {
+  id: string;
+  schedule_id: string;
+  day_number: number;
+  scheduled_date: string; // ISO date string
+  scheduled_time: string; // HH:MM
+  activity_name: string;
+  catalogue_id: string | null;
+  category: Category | null;
+  pre_achievement: number | null;
+  pre_connection: number | null;
+  pre_enjoyment: number | null;
+  post_achievement: number | null;
+  post_connection: number | null;
+  post_enjoyment: number | null;
+  completed: boolean;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface Schedule {
+  id: string;
+  session_id: string;
+  start_date: string; // ISO date string
+  created_at: string;
+}
+
+export interface UserSession {
+  id: string;
+  created_at: string;
+}
+
+export interface PastActivity {
+  id: string;
+  text: string;
+  created_at: string;
+}
