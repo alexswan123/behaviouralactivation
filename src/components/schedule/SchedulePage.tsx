@@ -196,6 +196,7 @@ export default function SchedulePage() {
               <ArrowRight size={14} />
             </button>
           )}
+          <div className="flex items-center gap-3 ml-auto">
           {totalPlanned > 0 && (
             <button
               onClick={() => { setShowExport(true); track.exportOpened(); }}
@@ -249,6 +250,7 @@ export default function SchedulePage() {
                 </button>
               </div>
             )}
+          </div>
           </div>
         </div>
       </div>
