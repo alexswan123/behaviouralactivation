@@ -38,6 +38,7 @@ export interface Schedule {
   id: string;
   session_id: string;
   start_date: string; // ISO date string
+  duration: number;   // number of days (default 10)
   created_at: string;
 }
 

@@ -17,9 +17,10 @@ interface TodayFocusProps {
   }) => Promise<void>;
   onUpdate: (id: string, updates: Partial<ScheduledActivity>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  maxDay: number;
 }
 
-export default function TodayFocus({ dayNumber, date, activities, onAdd, onUpdate, onDelete }: TodayFocusProps) {
+export default function TodayFocus({ dayNumber, date, activities, onAdd, onUpdate, onDelete, maxDay }: TodayFocusProps) {
   const [showModal, setShowModal] = useState(false);
 
   const d = new Date(date + 'T00:00:00');
@@ -96,7 +97,7 @@ export default function TodayFocus({ dayNumber, date, activities, onAdd, onUpdat
           targetDay={dayNumber}
           onAdd={onAdd}
           onClose={() => setShowModal(false)}
-          maxDay={10}
+          maxDay={maxDay}
         />
       )}
     </>

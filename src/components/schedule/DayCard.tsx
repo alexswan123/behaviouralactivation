@@ -18,9 +18,10 @@ interface DayCardProps {
   }) => Promise<void>;
   onUpdate: (id: string, updates: Partial<ScheduledActivity>) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
+  maxDay: number;
 }
 
-export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, onDelete }: DayCardProps) {
+export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, onDelete, maxDay }: DayCardProps) {
   const [showModal, setShowModal] = useState(false);
   const { weekday, date: dateLabel } = formatDayHeader(date);
   const today = isToday(date);
@@ -100,7 +101,7 @@ export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, 
           targetDay={dayNumber}
           onAdd={onAdd}
           onClose={() => setShowModal(false)}
-          maxDay={10}
+          maxDay={maxDay}
         />
       )}
     </>

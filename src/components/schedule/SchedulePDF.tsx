@@ -455,9 +455,10 @@ interface SchedulePDFProps {
 }
 
 export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) {
+  const duration = schedule.duration ?? 10;
   const startDate = new Date(schedule.start_date + 'T00:00:00');
   const endDate   = new Date(startDate);
-  endDate.setDate(endDate.getDate() + 9);
+  endDate.setDate(endDate.getDate() + duration - 1);
 
   const fmt = (d: Date) => d.toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
   const startLabel   = fmt(startDate);
@@ -481,7 +482,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
     { label: 'Enjoyment',   val: avgLift('pre_enjoyment',   'post_enjoyment')   },
   ];
 
-  const days = Array.from({ length: 10 }, (_, i) => {
+  const days = Array.from({ length: duration }, (_, i) => {
     const d = new Date(startDate);
     d.setDate(d.getDate() + i);
     const dateStr = d.toISOString().split('T')[0];

@@ -5,22 +5,33 @@ import { useSchedule } from '../../hooks/useSchedule';
 import HowItWorksSection from './HowItWorksSection';
 import { format } from '../../lib/dateUtils';
 import { spell } from '../../lib/spelling';
+import { track } from '../../lib/analytics';
+
+const DURATION_OPTIONS = [
+  { value: 10, label: '10 days', description: 'Standard' },
+  { value: 14, label: '14 days', description: '2 weeks' },
+  { value: 21, label: '21 days', description: '3 weeks' },
+  { value: 30, label: '30 days', description: '1 month' },
+];
 
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { createSchedule, schedule } = useSchedule();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState(format(new Date()));
+  const [duration, setDuration] = useState(10);
   const [creating, setCreating] = useState(false);
 
   const handleStart = async () => {
     if (schedule) {
+      track.programmeContinued();
       navigate('/schedule');
       return;
     }
     setCreating(true);
     try {
-      await createSchedule(new Date(startDate + 'T00:00:00'));
+      await createSchedule(new Date(startDate + 'T00:00:00'), duration);
+      track.programmeCreated(duration);
       navigate('/schedule');
     } catch (err) {
       console.error(err);
@@ -40,7 +51,7 @@ export default function WelcomePage() {
         <h1 className="text-4xl font-bold text-[#3D5A4C] mb-4">Bloom</h1>
         <p className="text-xl text-[#7D9B76] font-medium mb-2">Small steps. Real change.</p>
         <p className="text-[#9E9B97] max-w-md mx-auto">
-          A gentle 10-day {spell.programme.toLowerCase()} to help you reconnect with activities that bring
+          A gentle {spell.programme.toLowerCase()} to help you reconnect with activities that bring
           achievement, connection, and enjoyment back into your days.
         </p>
 
@@ -50,7 +61,7 @@ export default function WelcomePage() {
               onClick={() => setShowDatePicker(true)}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
-              Start my 10 days
+              Start my {spell.programme.toLowerCase()}
               <ArrowRight size={20} />
             </button>
           ) : showDatePicker && !schedule ? (
@@ -63,6 +74,23 @@ export default function WelcomePage() {
                 onChange={e => setStartDate(e.target.value)}
                 className="w-full border border-[#E8E4DE] rounded-lg px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76] mb-4"
               />
+              <p className="text-[#3D5A4C] font-semibold mb-2">How long is your {spell.programme.toLowerCase()}?</p>
+              <div className="grid grid-cols-4 gap-2 mb-4">
+                {DURATION_OPTIONS.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setDuration(opt.value)}
+                    className={`flex flex-col items-center py-2.5 px-1 rounded-lg border-2 text-xs font-medium transition-colors ${
+                      duration === opt.value
+                        ? 'border-[#7D9B76] bg-[#F0F7EE] text-[#3D5A4C]'
+                        : 'border-[#E8E4DE] text-[#9E9B97] hover:border-[#7D9B76] hover:text-[#3D5A4C]'
+                    }`}
+                  >
+                    <span className="font-bold text-sm">{opt.value}</span>
+                    <span>{opt.description}</span>
+                  </button>
+                ))}
+              </div>
               <button
                 onClick={handleStart}
                 disabled={creating}
