@@ -58,7 +58,7 @@ function LegalModal({ initialTab, onClose }: { initialTab: LegalTab; onClose: ()
             </>
           ) : (
             <>
-              <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">Last updated February 2026</p>
+              <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">Last updated February 2026 (v2)</p>
 
               <p>Your privacy matters to us. Bloom is designed so that your data stays with you.</p>
 
@@ -72,10 +72,10 @@ function LegalModal({ initialTab, onClose }: { initialTab: LegalTab; onClose: ()
               <p>You can delete all your data at any time using the "Reset program" option in the schedule settings, or by clearing your browser's local storage for this site.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">Analytics</h3>
-              <p>Bloom does not currently use any analytics, tracking scripts, or cookies beyond what is strictly necessary for the app to function.</p>
+              <p>Bloom uses PostHog to collect anonymous, aggregate usage data — things like which features are used and how often, so we can understand what's helpful and improve the product. We do not capture any content you enter (activity names, ACE scores, notes, or dates). We do not create user profiles or link any event to an individual. No personal information is collected or transmitted.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">Third-party services</h3>
-              <p>Bloom loads fonts from Google Fonts. This means Google's servers receive a request for font files when you visit the site. No personal data from within the app is shared with Google.</p>
+              <p>Bloom loads fonts from Google Fonts. This means Google's servers receive a request for font files when you visit the site. No personal data from within the app is shared with Google. Anonymous usage events are sent to PostHog (posthog.com), which is a privacy-focused analytics platform. PostHog processes data in the United States.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">Contact</h3>
               <p>Privacy questions: <a href={`mailto:${CONTACT}`} className="text-[#7D9B76] underline">{CONTACT}</a></p>

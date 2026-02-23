@@ -3,6 +3,7 @@ import { X, Search, Clock, Sparkles } from 'lucide-react';
 import { activities, categoryColours, categoryLabels } from '../../data/activities';
 import { usePastActivities } from '../../hooks/usePastActivities';
 import type { CatalogueActivity, Category } from '../../lib/types';
+import { track } from '../../lib/analytics';
 
 interface AddActivityModalProps {
   targetDay?: number;
@@ -80,6 +81,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
     if (!name) return;
     setSaving(true);
     try {
+      const source = selected ? 'catalogue' : initialCustomName ? 'past' : 'custom';
       await onAdd({
         dayNumber,
         activity_name: name,
@@ -87,6 +89,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
         catalogue_id: selected?.id ?? null,
         category: selected?.category ?? null,
       });
+      track.activityAdded({ source, category: selected?.category ?? null });
       onClose();
     } catch (err) {
       console.error(err);

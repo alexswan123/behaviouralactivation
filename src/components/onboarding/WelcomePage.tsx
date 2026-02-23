@@ -5,6 +5,7 @@ import { useSchedule } from '../../hooks/useSchedule';
 import HowItWorksSection from './HowItWorksSection';
 import { format } from '../../lib/dateUtils';
 import { spell } from '../../lib/spelling';
+import { track } from '../../lib/analytics';
 
 const DURATION_OPTIONS = [
   { value: 10, label: '10 days', description: 'Standard' },
@@ -23,12 +24,14 @@ export default function WelcomePage() {
 
   const handleStart = async () => {
     if (schedule) {
+      track.programmeContinued();
       navigate('/schedule');
       return;
     }
     setCreating(true);
     try {
       await createSchedule(new Date(startDate + 'T00:00:00'), duration);
+      track.programmeCreated(duration);
       navigate('/schedule');
     } catch (err) {
       console.error(err);

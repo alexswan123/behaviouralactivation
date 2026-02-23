@@ -8,6 +8,7 @@ import type { Schedule, ScheduledActivity } from '../../lib/types';
 import { spell } from '../../lib/spelling';
 import { generateICS, googleCalendarUrl } from '../../lib/icsGenerator';
 import SchedulePDF from './SchedulePDF';
+import { track } from '../../lib/analytics';
 
 interface ExportModalProps {
   schedule: Schedule;
@@ -106,6 +107,7 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
     a.download = `bloom-${spell.programme.toLowerCase()}-${schedule.start_date}.ics`;
     a.click();
     URL.revokeObjectURL(url);
+    track.exportIcsDownloaded();
   };
 
   const handleDownloadPdf = async () => {
@@ -120,6 +122,7 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
       a.download = `bloom-${spell.programme.toLowerCase()}-${schedule.start_date}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
+      track.exportPdfDownloaded();
     } finally {
       setGeneratingPdf(false);
     }
@@ -134,6 +137,7 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
     a.download = `bloom-schedule-${schedule.start_date}.txt`;
     a.click();
     URL.revokeObjectURL(url);
+    track.exportTxtDownloaded();
   };
 
   const handleEmail = () => {
@@ -142,12 +146,14 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
     const subject = encodeURIComponent(`My Bloom ${spell.programme}`);
     const body = encodeURIComponent(text.slice(0, 1800) + (text.length > 1800 ? '\n\n[Download the full version for the complete schedule]' : ''));
     window.open(`mailto:${encodeURIComponent(email.trim())}?subject=${subject}&body=${body}`);
+    track.exportEmailSent();
   };
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(buildPlainText(schedule, activities));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    track.exportTextCopied();
   };
 
   // ── Render ──────────────────────────────────────────────────────────────────
