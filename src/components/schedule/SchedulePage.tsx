@@ -202,7 +202,7 @@ export default function SchedulePage() {
               className="flex items-center gap-1.5 text-sm font-semibold bg-white/15 text-white px-4 py-2.5 rounded-xl hover:bg-white/25 transition-colors"
             >
               <Download size={14} />
-              Save / email
+              <span className="hidden sm:inline">Save / email</span>
             </button>
           )}
           {/* Settings menu */}
@@ -215,7 +215,7 @@ export default function SchedulePage() {
               <Settings size={16} />
             </button>
             {menuOpen && (
-              <div className="absolute left-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-[#E8E3DB] overflow-hidden z-30">
+              <div className="absolute right-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-[#E8E3DB] overflow-hidden z-30">
                 <button
                   onClick={handleChangeDate}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
