@@ -3,6 +3,7 @@ import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2 } from 'lucide-reac
 import ACEScoreInput from './ACEScoreInput';
 import { categoryColours, categoryLabels } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
+import { track } from '../../lib/analytics';
 
 interface ActivitySlotProps {
   activity: ScheduledActivity;
@@ -58,6 +59,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
     setSaving(true);
     try {
       await onUpdate(activity.id, { completed: true });
+      track.activityCompleted({ category: activity.category ?? null });
       setShowPostScores(true);
     } finally {
       setSaving(false);
@@ -163,7 +165,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
 
           {/* Delete */}
           <button
-            onClick={() => onDelete(activity.id)}
+            onClick={() => { track.activityDeleted(); onDelete(activity.id); }}
             className="flex items-center gap-1.5 text-xs text-[#C17C5A] hover:text-[#9B5A3A] transition-colors"
           >
             <Trash2 size={13} />

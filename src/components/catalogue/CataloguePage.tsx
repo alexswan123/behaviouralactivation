@@ -9,6 +9,7 @@ import AddActivityModal from '../schedule/AddActivityModal';
 import type { CatalogueActivity, Category } from '../../lib/types';
 import { categoryColours, categoryLabels } from '../../data/activities';
 import { spell } from '../../lib/spelling';
+import { track } from '../../lib/analytics';
 
 export default function CataloguePage() {
   const { search, setSearch, activeCategory, setActiveCategory, groupedFiltered, filtered } = useCatalogue();
@@ -164,7 +165,13 @@ export default function CataloguePage() {
             className="w-full pl-11 pr-4 py-3 border-2 border-[#E8E3DB] rounded-xl bg-white text-[#3D5A4C] placeholder:text-[#C4BFB8] focus:outline-none focus:border-[#7D9B76] text-sm"
           />
         </div>
-        <CategoryFilter active={activeCategory} onChange={setActiveCategory} />
+        <CategoryFilter
+          active={activeCategory}
+          onChange={(cat) => {
+            setActiveCategory(cat);
+            if (cat !== 'all') track.catalogueCategoryFiltered(cat);
+          }}
+        />
       </div>
 
       {/* Content */}

@@ -7,6 +7,7 @@ import DayCard from './DayCard';
 import TodayFocus from './TodayFocus';
 import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
+import { track } from '../../lib/analytics';
 
 const DURATION_OPTIONS = [10, 14, 21, 30];
 
@@ -107,6 +108,7 @@ export default function SchedulePage() {
   };
 
   const handleConfirmChangeDuration = () => {
+    track.programmeLengthChanged({ from: schedule?.duration ?? 10, to: newDuration });
     changeDuration(newDuration);
     setDialog(null);
   };
@@ -141,7 +143,7 @@ export default function SchedulePage() {
           )}
           {totalPlanned > 0 && (
             <button
-              onClick={() => setShowExport(true)}
+              onClick={() => { setShowExport(true); track.exportOpened(); }}
               className="flex items-center gap-1.5 text-sm font-semibold bg-white/15 text-white px-4 py-2.5 rounded-xl hover:bg-white/25 transition-colors"
             >
               <Download size={14} />
@@ -329,14 +331,14 @@ export default function SchedulePage() {
                 Choose what to reset. This can't be undone.
               </p>
               <button
-                onClick={() => { resetActivitiesOnly(); setDialog(null); }}
+                onClick={() => { track.scheduleResetActivities(); resetActivitiesOnly(); setDialog(null); }}
                 className="w-full text-left px-4 py-3.5 rounded-xl border-2 border-[#EDE8E0] hover:border-[#C17C5A] hover:bg-[#FFF5EE] transition-colors"
               >
                 <p className="text-sm font-semibold text-[#3D5A4C]">Clear all planned activities</p>
                 <p className="text-xs text-[#8A8680] mt-0.5">Keeps your start date, wipes the slate clean</p>
               </button>
               <button
-                onClick={() => { resetSchedule(); navigate('/'); }}
+                onClick={() => { track.scheduleResetFull(); resetSchedule(); navigate('/'); }}
                 className="w-full text-left px-4 py-3.5 rounded-xl border-2 border-[#EDE8E0] hover:border-[#9B3A45] hover:bg-[#FDE8E8] transition-colors"
               >
                 <p className="text-sm font-semibold text-[#9B3A45]">Start completely fresh</p>
