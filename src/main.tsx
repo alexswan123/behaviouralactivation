@@ -12,8 +12,8 @@ const posthogOptions = {
   defaults: '2026-01-30' as const,
   // Enable debug logging to diagnose ingestion issues
   debug: true,
-  // Never create persistent user profiles — this is a no-login, anonymous app
-  person_profiles: 'never' as const,
+  // Only create person profiles when explicitly identified (default from defaults option)
+  // person_profiles: 'never' as const,
   // Disable session recording — too privacy-sensitive for a mental health tool
   disable_session_recording: true,
   // Don't capture performance metrics / exceptions automatically
