@@ -172,7 +172,7 @@ export default function SchedulePage() {
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
                 >
                   <Timer size={15} className="text-[#7D9B76]" />
-                  Change programme length
+                  Change program length
                 </button>
                 <div className="h-px bg-[#EDE8E0]" />
                 <button
@@ -180,7 +180,7 @@ export default function SchedulePage() {
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#9B3A45] hover:bg-[#FDE8E8] transition-colors text-left"
                 >
                   <RotateCcw size={15} />
-                  Reset programme
+                  Reset program
                 </button>
               </div>
             )}
@@ -265,12 +265,12 @@ export default function SchedulePage() {
         </div>
       )}
 
-      {/* Change programme length dialog */}
+      {/* Change program length dialog */}
       {dialog === 'changeDuration' && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-[#DDD8D0]">
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8E0]">
-              <h2 className="font-semibold text-[#2A3D32]">Change programme length</h2>
+              <h2 className="font-semibold text-[#2A3D32]">Change program length</h2>
               <button onClick={() => setDialog(null)} className="p-1.5 rounded-lg hover:bg-[#F0EBE3] text-[#9E9B97]">
                 <X size={18} />
               </button>
@@ -319,7 +319,7 @@ export default function SchedulePage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-[#DDD8D0]">
             <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8E0]">
-              <h2 className="font-semibold text-[#2A3D32]">Reset programme</h2>
+              <h2 className="font-semibold text-[#2A3D32]">Reset program</h2>
               <button onClick={() => setDialog(null)} className="p-1.5 rounded-lg hover:bg-[#F0EBE3] text-[#9E9B97]">
                 <X size={18} />
               </button>

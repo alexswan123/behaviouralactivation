@@ -69,7 +69,7 @@ function LegalModal({ initialTab, onClose }: { initialTab: LegalTab; onClose: ()
               <p>The only data stored is what you enter into Bloom: your schedule start date, planned activities, and any ACE scores or notes you record. This data lives entirely in your browser and is not accessible to us.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">Clearing your data</h3>
-              <p>You can delete all your data at any time using the "Reset programme" option in the schedule settings, or by clearing your browser's local storage for this site.</p>
+              <p>You can delete all your data at any time using the "Reset program" option in the schedule settings, or by clearing your browser's local storage for this site.</p>
 
               <h3 className="font-semibold text-[#2A3D32]">Analytics</h3>
               <p>Bloom does not currently use any analytics, tracking scripts, or cookies beyond what is strictly necessary for the app to function.</p>
