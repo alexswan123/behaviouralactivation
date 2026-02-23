@@ -68,6 +68,8 @@ export function useSchedule() {
       post_achievement: null,
       post_connection: null,
       post_enjoyment: null,
+      pre_depression: null,
+      post_depression: null,
       completed: false,
       notes: null,
       created_at: new Date().toISOString(),

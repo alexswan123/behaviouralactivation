@@ -107,3 +107,18 @@ export function addPastActivity(text: string): PastActivity {
 export function removePastActivity(id: string): void {
   write(KEYS.pastActivities, getPastActivities().filter(p => p.id !== id));
 }
+
+// ── Favourite catalogue activities ────────────────────────────────────────────
+
+const FAV_KEY = 'ba_favourite_activities';
+
+export function getFavouriteActivities(): string[] {
+  return read<string[]>(FAV_KEY) ?? [];
+}
+
+export function toggleFavouriteActivity(id: string): string[] {
+  const current = getFavouriteActivities();
+  const updated = current.includes(id) ? current.filter(x => x !== id) : [...current, id];
+  write(FAV_KEY, updated);
+  return updated;
+}

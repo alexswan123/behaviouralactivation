@@ -1,13 +1,15 @@
-import { Plus } from 'lucide-react';
+import { Plus, Star } from 'lucide-react';
 import { categoryColours, categoryLabels } from '../../data/activities';
 import type { CatalogueActivity } from '../../lib/types';
 
 interface ActivityCardProps {
   activity: CatalogueActivity;
   onAdd: (activity: CatalogueActivity) => void;
+  isFavourite?: boolean;
+  onToggleFavourite?: (id: string) => void;
 }
 
-export default function ActivityCard({ activity, onAdd }: ActivityCardProps) {
+export default function ActivityCard({ activity, onAdd, isFavourite = false, onToggleFavourite }: ActivityCardProps) {
   const colours = categoryColours[activity.category];
 
   return (
@@ -17,12 +19,26 @@ export default function ActivityCard({ activity, onAdd }: ActivityCardProps) {
           <p className="font-semibold text-[#2A3D32] text-[15px] leading-snug">{activity.name}</p>
           <p className="text-sm text-[#8A8680] mt-1 leading-relaxed">{activity.description}</p>
         </div>
-        <span
-          className="px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0 mt-0.5"
-          style={{ background: colours.bg, color: colours.text, border: `1px solid ${colours.border}` }}
-        >
-          {categoryLabels[activity.category]}
-        </span>
+        <div className="flex items-center gap-1.5 shrink-0 mt-0.5">
+          {onToggleFavourite && (
+            <button
+              onClick={e => { e.stopPropagation(); onToggleFavourite(activity.id); }}
+              className="p-1 rounded-lg hover:bg-[#FFF8E0] transition-colors"
+              aria-label={isFavourite ? 'Remove from favourites' : 'Add to favourites'}
+            >
+              <Star
+                size={16}
+                className={isFavourite ? 'text-[#D4A030] fill-[#D4A030]' : 'text-[#C8C4BE]'}
+              />
+            </button>
+          )}
+          <span
+            className="px-2.5 py-1 rounded-lg text-xs font-semibold"
+            style={{ background: colours.bg, color: colours.text, border: `1px solid ${colours.border}` }}
+          >
+            {categoryLabels[activity.category]}
+          </span>
+        </div>
       </div>
       <button
         onClick={() => onAdd(activity)}

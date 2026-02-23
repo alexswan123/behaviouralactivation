@@ -29,6 +29,8 @@ export interface ScheduledActivity {
   post_achievement: number | null;
   post_connection: number | null;
   post_enjoyment: number | null;
+  pre_depression: number | null;
+  post_depression: number | null;
   completed: boolean;
   notes: string | null;
   created_at: string;
