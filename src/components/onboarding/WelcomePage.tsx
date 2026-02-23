@@ -7,19 +7,11 @@ import { format } from '../../lib/dateUtils';
 import { spell } from '../../lib/spelling';
 import { track } from '../../lib/analytics';
 
-const DURATION_OPTIONS = [
-  { value: 10, label: '10 days', description: 'Standard' },
-  { value: 14, label: '14 days', description: '2 weeks' },
-  { value: 21, label: '21 days', description: '3 weeks' },
-  { value: 30, label: '30 days', description: '1 month' },
-];
-
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { createSchedule, schedule } = useSchedule();
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState(format(new Date()));
-  const [duration, setDuration] = useState(10);
   const [creating, setCreating] = useState(false);
 
   const handleStart = async () => {
@@ -30,8 +22,8 @@ export default function WelcomePage() {
     }
     setCreating(true);
     try {
-      await createSchedule(new Date(startDate + 'T00:00:00'), duration);
-      track.programmeCreated(duration);
+      await createSchedule(new Date(startDate + 'T00:00:00'), 10);
+      track.programmeCreated(10);
       navigate('/schedule');
     } catch (err) {
       console.error(err);
@@ -74,23 +66,6 @@ export default function WelcomePage() {
                 onChange={e => setStartDate(e.target.value)}
                 className="w-full border border-[#E8E4DE] rounded-lg px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76] mb-4"
               />
-              <p className="text-[#3D5A4C] font-semibold mb-2">How long is your {spell.programme.toLowerCase()}?</p>
-              <div className="grid grid-cols-4 gap-2 mb-4">
-                {DURATION_OPTIONS.map(opt => (
-                  <button
-                    key={opt.value}
-                    onClick={() => setDuration(opt.value)}
-                    className={`flex flex-col items-center py-2.5 px-1 rounded-lg border-2 text-xs font-medium transition-colors ${
-                      duration === opt.value
-                        ? 'border-[#7D9B76] bg-[#F0F7EE] text-[#3D5A4C]'
-                        : 'border-[#E8E4DE] text-[#9E9B97] hover:border-[#7D9B76] hover:text-[#3D5A4C]'
-                    }`}
-                  >
-                    <span className="font-bold text-sm">{opt.value}</span>
-                    <span>{opt.description}</span>
-                  </button>
-                ))}
-              </div>
               <button
                 onClick={handleStart}
                 disabled={creating}
