@@ -215,7 +215,7 @@ export default function SchedulePage() {
               <Settings size={16} />
             </button>
             {menuOpen && (
-              <div className="fixed right-4 sm:absolute sm:right-0 top-auto sm:top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-[#E8E3DB] overflow-hidden z-30">
+              <div className="absolute left-0 top-full mt-2 w-52 bg-white rounded-xl shadow-xl border border-[#E8E3DB] overflow-hidden z-30">
                 <button
                   onClick={handleChangeDate}
                   className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
