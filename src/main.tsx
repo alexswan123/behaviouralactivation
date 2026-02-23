@@ -10,10 +10,8 @@ inject()
 const posthogOptions = {
   api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
   defaults: '2026-01-30' as const,
-  // Enable debug logging to diagnose ingestion issues
-  debug: true,
-  // Only create person profiles when explicitly identified (default from defaults option)
-  // person_profiles: 'never' as const,
+  // Only create person profiles when explicitly identified — no persistent tracking
+  person_profiles: 'identified_only' as const,
   // Disable session recording — too privacy-sensitive for a mental health tool
   disable_session_recording: true,
   // Don't capture performance metrics / exceptions automatically
