@@ -1,15 +1,27 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { inject } from '@vercel/analytics'
+import { PostHogProvider } from '@posthog/react'
 import './index.css'
 import App from './App.tsx'
-import { initAnalytics } from './lib/analytics'
 
 inject()
-initAnalytics()
+
+const posthogOptions = {
+  api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
+  defaults: '2026-01-30' as const,
+  // Never create persistent user profiles — this is a no-login, anonymous app
+  person_profiles: 'never' as const,
+  // Disable session recording — too privacy-sensitive for a mental health tool
+  disable_session_recording: true,
+  // Don't capture performance metrics / exceptions automatically
+  capture_performance: false,
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <App />
+    <PostHogProvider apiKey={import.meta.env.VITE_PUBLIC_POSTHOG_KEY} options={posthogOptions}>
+      <App />
+    </PostHogProvider>
   </StrictMode>,
 )

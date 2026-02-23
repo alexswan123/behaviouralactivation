@@ -1,23 +1,5 @@
 import posthog from 'posthog-js';
 
-const key = import.meta.env.VITE_PUBLIC_POSTHOG_KEY as string | undefined;
-const host = import.meta.env.VITE_PUBLIC_POSTHOG_HOST as string | undefined;
-
-export function initAnalytics() {
-  if (!key) return;
-  posthog.init(key, {
-    api_host: host ?? 'https://us.i.posthog.com',
-    // Never create persistent user profiles — this is a no-login, anonymous app
-    person_profiles: 'never',
-    // Capture page views automatically
-    capture_pageview: true,
-    // Disable session recording — too privacy-sensitive for a mental health tool
-    disable_session_recording: true,
-    // Don't capture performance metrics / exceptions automatically
-    capture_performance: false,
-  });
-}
-
 // ── Safe event helpers ────────────────────────────────────────────────────────
 // Rule: never capture activity names, ACE scores, notes, or any user-typed text.
 // Only capture structural metadata (category, duration, feature used).
