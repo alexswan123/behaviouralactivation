@@ -7,15 +7,14 @@ import App from './App.tsx'
 
 inject()
 
-// Initialise PostHog directly so the same singleton is used everywhere (incl. analytics.ts)
+// Initialise PostHog — same singleton used by analytics.ts
 if (import.meta.env.VITE_PUBLIC_POSTHOG_KEY) {
   posthog.init(import.meta.env.VITE_PUBLIC_POSTHOG_KEY, {
     api_host: import.meta.env.VITE_PUBLIC_POSTHOG_HOST,
     defaults: '2026-01-30' as const,
-    person_profiles: 'always' as const,
+    person_profiles: 'identified_only' as const,
     disable_session_recording: true,
     capture_performance: false,
-    debug: true, // temporarily enable to verify events in console
   })
 }
 
