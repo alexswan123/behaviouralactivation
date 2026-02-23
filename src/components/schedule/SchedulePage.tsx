@@ -1,26 +1,31 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X, Timer } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X, Timer, Sparkles } from 'lucide-react';
 import { spell } from '../../lib/spelling';
 import { useSchedule } from '../../hooks/useSchedule';
+import { useFavourites } from '../../hooks/useFavourites';
 import DayCard from './DayCard';
 import TodayFocus from './TodayFocus';
 import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
 import { track } from '../../lib/analytics';
+import { activities as catalogueActivities } from '../../data/activities';
+import type { Category } from '../../lib/types';
 
 const DURATION_OPTIONS = [10, 14, 21, 30];
 
-type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | null;
+type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | 'quickFill' | null;
 
 export default function SchedulePage() {
   const navigate = useNavigate();
   const { schedule, activities, loading, error, addActivity, updateActivity, deleteActivity, changeStartDate, changeDuration, resetSchedule, resetActivitiesOnly } = useSchedule();
+  const { isFavourite } = useFavourites();
   const [showExport, setShowExport] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [dialog, setDialog] = useState<DialogMode>(null);
   const [newDateValue, setNewDateValue] = useState('');
   const [newDuration, setNewDuration] = useState(10);
+  const [quickFillCount, setQuickFillCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close menu on outside click
@@ -113,6 +118,56 @@ export default function SchedulePage() {
     setDialog(null);
   };
 
+  const handleQuickFillMenu = () => {
+    if (!schedule) return;
+    const duration = schedule.duration ?? 10;
+    const daysWithActivities = new Set(activities.map(a => a.day_number));
+    const emptyDays = Array.from({ length: duration }, (_, i) => i + 1).filter(d => !daysWithActivities.has(d));
+    setQuickFillCount(emptyDays.length);
+    setDialog('quickFill');
+    setMenuOpen(false);
+  };
+
+  const handleConfirmQuickFill = async () => {
+    if (!schedule) return;
+    const duration = schedule.duration ?? 10;
+    const daysWithActivities = new Set(activities.map(a => a.day_number));
+    const emptyDays = Array.from({ length: duration }, (_, i) => i + 1).filter(d => !daysWithActivities.has(d));
+
+    const categoryOrder: Category[] = ['achievement', 'social', 'body', 'pleasure'];
+    const timeByCategory: Record<Category, string> = {
+      achievement: '09:00',
+      body: '09:00',
+      social: '15:00',
+      pleasure: '19:00',
+    };
+
+    const favouriteCats = catalogueActivities.filter(a => isFavourite(a.id));
+
+    for (let i = 0; i < emptyDays.length; i++) {
+      const dayNumber = emptyDays[i];
+      const cat = categoryOrder[i % categoryOrder.length];
+
+      // Try favourite first
+      let pick = favouriteCats.find(a => a.category === cat);
+      // Fall back to any from catalogue
+      if (!pick) {
+        const pool = catalogueActivities.filter(a => a.category === cat);
+        pick = pool[Math.floor(Math.random() * pool.length)];
+      }
+      if (!pick) continue;
+
+      await addActivity({
+        dayNumber,
+        activity_name: pick.name,
+        scheduled_time: timeByCategory[cat],
+        catalogue_id: pick.id,
+        category: pick.category,
+      });
+    }
+    setDialog(null);
+  };
+
   return (
     <div>
       {/* Summary bar */}
@@ -175,6 +230,14 @@ export default function SchedulePage() {
                 >
                   <Timer size={15} className="text-[#7D9B76]" />
                   Change program length
+                </button>
+                <div className="h-px bg-[#EDE8E0]" />
+                <button
+                  onClick={handleQuickFillMenu}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
+                >
+                  <Sparkles size={15} className="text-[#7D9B76]" />
+                  Quick fill empty days
                 </button>
                 <div className="h-px bg-[#EDE8E0]" />
                 <button
@@ -311,6 +374,54 @@ export default function SchedulePage() {
                   Update
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Quick fill dialog */}
+      {dialog === 'quickFill' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-[#DDD8D0]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8E0]">
+              <h2 className="font-semibold text-[#2A3D32]">Quick fill empty days</h2>
+              <button onClick={() => setDialog(null)} className="p-1.5 rounded-lg hover:bg-[#F0EBE3] text-[#9E9B97]">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              {quickFillCount === 0 ? (
+                <p className="text-sm text-[#8A8680]">All days already have activities — nothing to fill.</p>
+              ) : (
+                <>
+                  <p className="text-sm text-[#8A8680]">
+                    Add suggested activities to your <strong>{quickFillCount} empty {quickFillCount === 1 ? 'day' : 'days'}</strong>?
+                    You can remove any you don't want.
+                  </p>
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() => setDialog(null)}
+                      className="flex-1 py-3 rounded-xl border border-[#EDE8E0] text-[#5C5A57] text-sm font-medium hover:bg-[#F0EBE3] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={handleConfirmQuickFill}
+                      className="flex-1 py-3 rounded-xl bg-[#3D5A4C] text-white text-sm font-semibold hover:bg-[#2A3D32] transition-colors"
+                    >
+                      Fill schedule
+                    </button>
+                  </div>
+                </>
+              )}
+              {quickFillCount === 0 && (
+                <button
+                  onClick={() => setDialog(null)}
+                  className="w-full py-2.5 text-sm text-[#8A8680] hover:text-[#3D5A4C] transition-colors"
+                >
+                  Close
+                </button>
+              )}
             </div>
           </div>
         </div>

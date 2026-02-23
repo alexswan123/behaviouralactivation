@@ -1,25 +1,56 @@
-import { useState } from 'react';
-import { Search, Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useMemo } from 'react';
+import { Search, Plus, X, ChevronDown, ChevronUp, Star, TrendingUp } from 'lucide-react';
 import { useCatalogue } from '../../hooks/useCatalogue';
 import { useSchedule } from '../../hooks/useSchedule';
 import { usePastActivities } from '../../hooks/usePastActivities';
+import { useFavourites } from '../../hooks/useFavourites';
 import CategoryFilter from './CategoryFilter';
 import ActivityCard from './ActivityCard';
 import AddActivityModal from '../schedule/AddActivityModal';
 import type { CatalogueActivity, Category } from '../../lib/types';
-import { categoryColours, categoryLabels } from '../../data/activities';
+import { activities as allActivities, categoryColours, categoryLabels } from '../../data/activities';
 import { spell } from '../../lib/spelling';
 import { track } from '../../lib/analytics';
 
 export default function CataloguePage() {
   const { search, setSearch, activeCategory, setActiveCategory, groupedFiltered, filtered } = useCatalogue();
-  const { addActivity, schedule } = useSchedule();
+  const { addActivity, schedule, activities: scheduledActivities } = useSchedule();
   const { items: pastItems, add: addPast, remove: removePast } = usePastActivities();
+  const { favourites, toggle: toggleFav, isFavourite } = useFavourites();
   const [selectedActivity, setSelectedActivity] = useState<CatalogueActivity | null>(null);
   const [pastInput, setPastInput] = useState('');
   const [pastExpanded, setPastExpanded] = useState(true);
   // When adding from past list, pre-fill the custom name
   const [pastToAdd, setPastToAdd] = useState<string | null>(null);
+
+  // Compute "helped you most" — top 3 catalogue activities by avg ACE lift
+  const helpedMost = useMemo(() => {
+    const completed = scheduledActivities.filter(
+      a => a.completed && a.catalogue_id &&
+      a.post_achievement !== null && a.post_connection !== null && a.post_enjoyment !== null
+    );
+    if (completed.length === 0) return [];
+    const byId = new Map<string, { total: number; count: number }>();
+    for (const a of completed) {
+      const lift =
+        ((a.post_achievement ?? 0) - (a.pre_achievement ?? 0)) +
+        ((a.post_connection ?? 0) - (a.pre_connection ?? 0)) +
+        ((a.post_enjoyment ?? 0) - (a.pre_enjoyment ?? 0));
+      const entry = byId.get(a.catalogue_id!) ?? { total: 0, count: 0 };
+      byId.set(a.catalogue_id!, { total: entry.total + lift, count: entry.count + 1 });
+    }
+    return [...byId.entries()]
+      .map(([id, { total, count }]) => ({ id, avg: total / count }))
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, 3)
+      .map(({ id, avg }) => ({ activity: allActivities.find(a => a.id === id)!, avg }))
+      .filter(x => x.activity);
+  }, [scheduledActivities]);
+
+  const favouriteActivities = useMemo(
+    () => allActivities.filter(a => isFavourite(a.id)),
+    [favourites, isFavourite]
+  );
 
   const handleModalAdd = async (data: {
     dayNumber: number;
@@ -153,6 +184,53 @@ export default function CataloguePage() {
         )}
       </div>
 
+      {/* ── My favourites ────────────────────────────────────────────────── */}
+      {favouriteActivities.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <Star size={16} className="text-[#D4A030] fill-[#D4A030]" />
+            <h2 className="font-semibold text-[#2A3D32] text-sm">My favourites</h2>
+            <span className="text-xs text-[#8A8680]">({favouriteActivities.length})</span>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {favouriteActivities.map(activity => (
+              <ActivityCard
+                key={activity.id}
+                activity={activity}
+                onAdd={setSelectedActivity}
+                isFavourite={isFavourite(activity.id)}
+                onToggleFavourite={toggleFav}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ── Helped you most ──────────────────────────────────────────────── */}
+      {helpedMost.length > 0 && (
+        <div className="mb-8">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp size={16} className="text-[#7D9B76]" />
+            <h2 className="font-semibold text-[#2A3D32] text-sm">Helped you most</h2>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {helpedMost.map(({ activity, avg }) => (
+              <div key={activity.id} className="relative">
+                <ActivityCard
+                  activity={activity}
+                  onAdd={setSelectedActivity}
+                  isFavourite={isFavourite(activity.id)}
+                  onToggleFavourite={toggleFav}
+                />
+                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[#F0F7EE] border border-[#C8DCC4] text-[10px] font-semibold text-[#5C7A55]">
+                  ⬆ +{avg.toFixed(1)} avg lift
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Search + filter row */}
       <div className="flex flex-col sm:flex-row gap-3 mb-8">
         <div className="relative flex-1">
@@ -195,7 +273,7 @@ export default function CataloguePage() {
                       <h3 className="text-sm font-semibold text-[#8A8680] uppercase tracking-widest mb-4">{group}</h3>
                       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                         {items.map(activity => (
-                          <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} />
+                          <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
                         ))}
                       </div>
                     </div>
@@ -212,7 +290,7 @@ export default function CataloguePage() {
               <h3 className="text-sm font-semibold text-[#8A8680] uppercase tracking-widest mb-4">{group}</h3>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                 {items.map(activity => (
-                  <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} />
+                  <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
                 ))}
               </div>
             </div>

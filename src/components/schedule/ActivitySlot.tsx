@@ -1,6 +1,7 @@
 import { useState, useCallback } from 'react';
 import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2 } from 'lucide-react';
 import ACEScoreInput from './ACEScoreInput';
+import DepressionSlider from './DepressionSlider';
 import { categoryColours, categoryLabels } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
 import { track } from '../../lib/analytics';
@@ -122,11 +123,19 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
             <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
               Expected scores (before)
             </p>
-            <ACEScoreInput
-              values={preScores}
-              onChange={handlePreChange}
+            <DepressionSlider
+              timing="before"
+              value={activity.pre_depression ?? null}
+              onChange={v => onUpdate(activity.id, { pre_depression: v })}
               disabled={activity.completed}
             />
+            <div className="mt-3">
+              <ACEScoreInput
+                values={preScores}
+                onChange={handlePreChange}
+                disabled={activity.completed}
+              />
+            </div>
           </div>
 
           {/* Mark done / post scores */}
@@ -143,10 +152,17 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
               <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
                 Actual scores (after)
               </p>
+              <DepressionSlider
+                timing="after"
+                value={activity.post_depression ?? null}
+                onChange={v => onUpdate(activity.id, { post_depression: v })}
+              />
+              <div className="mt-3">
               <ACEScoreInput
                 values={postScores}
                 onChange={handlePostChange}
               />
+              </div>
               {/* Notes */}
               <div className="mt-4">
                 <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-2">

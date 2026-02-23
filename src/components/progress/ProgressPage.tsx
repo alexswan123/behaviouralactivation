@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { ArrowRight, TrendingUp, Zap, Users, Heart } from 'lucide-react';
+import { ArrowRight, TrendingUp, Zap, Users, Heart, Smile, BrainCircuit } from 'lucide-react';
 import { useSchedule } from '../../hooks/useSchedule';
+import { activities as allActivities } from '../../data/activities';
 
 export default function ProgressPage() {
   const navigate = useNavigate();
@@ -48,6 +49,48 @@ export default function ProgressPage() {
     const bestCategory = Object.entries(lifts).sort((a, b) => b[1] - a[1])[0];
 
     return { chartData, lifts, bestCategory };
+  }, [completedActivities]);
+
+  // ── Insights ──────────────────────────────────────────────────────────────
+  const insights = useMemo(() => {
+    if (completedActivities.length < 3) return null;
+
+    // Depression insights — activities that have both pre and post depression scores
+    const withDepression = completedActivities.filter(
+      a => a.pre_depression !== null && a.post_depression !== null
+    );
+
+    let lowestPost: typeof completedActivities[0] | null = null;
+    let biggestDrop: { activity: typeof completedActivities[0]; drop: number } | null = null;
+
+    for (const a of withDepression) {
+      const drop = (a.pre_depression ?? 0) - (a.post_depression ?? 0);
+      if (!lowestPost || (a.post_depression ?? 100) < (lowestPost.post_depression ?? 100)) {
+        lowestPost = a;
+      }
+      if (!biggestDrop || drop > biggestDrop.drop) {
+        biggestDrop = { activity: a, drop };
+      }
+    }
+
+    // Most effective catalogue activities (top 3 by avg lift)
+    const byId = new Map<string, { total: number; count: number; name: string }>();
+    for (const a of completedActivities) {
+      if (!a.catalogue_id) continue;
+      const lift =
+        ((a.post_achievement ?? 0) - (a.pre_achievement ?? 0)) +
+        ((a.post_connection ?? 0) - (a.pre_connection ?? 0)) +
+        ((a.post_enjoyment ?? 0) - (a.pre_enjoyment ?? 0));
+      const cat = allActivities.find(c => c.id === a.catalogue_id);
+      const entry = byId.get(a.catalogue_id) ?? { total: 0, count: 0, name: cat?.category ?? a.activity_name };
+      byId.set(a.catalogue_id, { total: entry.total + lift, count: entry.count + 1, name: entry.name });
+    }
+    const topActivities = [...byId.entries()]
+      .map(([id, { total, count, name }]) => ({ id, avg: total / count, name }))
+      .sort((a, b) => b.avg - a.avg)
+      .slice(0, 3);
+
+    return { lowestPost, biggestDrop, topActivities };
   }, [completedActivities]);
 
   if (loading) {
@@ -189,6 +232,65 @@ export default function ProgressPage() {
           </BarChart>
         </ResponsiveContainer>
       </div>
+
+      {/* Insights section */}
+      {insights && (insights.lowestPost || insights.biggestDrop || insights.topActivities.length > 0) && (
+        <div className="space-y-4">
+          <h2 className="font-semibold text-[#3D5A4C] text-lg">What's working</h2>
+
+          {insights.biggestDrop && insights.biggestDrop.drop > 0 && (
+            <div className="bg-[#F0F7EE] border border-[#C8DCC4] rounded-2xl p-5 flex items-start gap-4">
+              <div className="w-9 h-9 bg-[#D8EDD8] rounded-xl flex items-center justify-center shrink-0">
+                <Smile size={18} className="text-[#3D5A4C]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#3D5A4C] text-sm">Biggest mood improvement</p>
+                <p className="text-sm text-[#5C7A55] mt-0.5">
+                  <strong>{insights.biggestDrop.activity.activity_name}</strong> dropped your depression score by{' '}
+                  <strong>{insights.biggestDrop.drop} points</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {insights.lowestPost && (
+            <div className="bg-[#F5F0FF] border border-[#D4C8F0] rounded-2xl p-5 flex items-start gap-4">
+              <div className="w-9 h-9 bg-[#E8E0FF] rounded-xl flex items-center justify-center shrink-0">
+                <BrainCircuit size={18} className="text-[#6A5A9C]" />
+              </div>
+              <div>
+                <p className="font-semibold text-[#4A3A7C] text-sm">Lowest depression after an activity</p>
+                <p className="text-sm text-[#6A5A9C] mt-0.5">
+                  Score of <strong>{insights.lowestPost.post_depression}</strong> after{' '}
+                  <strong>{insights.lowestPost.activity_name}</strong>.
+                </p>
+              </div>
+            </div>
+          )}
+
+          {insights.topActivities.length > 0 && (
+            <div className="bg-white border border-[#E8E4DE] rounded-2xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <TrendingUp size={16} className="text-[#7D9B76]" />
+                <p className="font-semibold text-[#3D5A4C] text-sm">Activities that work best for you</p>
+              </div>
+              <div className="space-y-3">
+                {insights.topActivities.map(({ id, avg, name }, i) => (
+                  <div key={id} className="flex items-center gap-3">
+                    <span className="w-6 h-6 rounded-full bg-[#F0F7EE] text-[#7D9B76] text-xs font-bold flex items-center justify-center shrink-0">
+                      {i + 1}
+                    </span>
+                    <span className="text-sm text-[#3D5A4C] capitalize flex-1">{name}</span>
+                    <span className="text-xs font-semibold text-[#7D9B76] bg-[#F0F7EE] px-2 py-0.5 rounded-lg">
+                      +{avg.toFixed(1)} avg
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       <p className="text-sm text-[#9E9B97] text-center pb-4">
         Keep going. The more activities you log, the clearer the picture becomes.
