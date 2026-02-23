@@ -2,31 +2,44 @@ interface DepressionSliderProps {
   value: number | null;
   onChange: (value: number | null) => void;
   disabled?: boolean;
-  label: string;
+  /** 'before' shows "right now, before starting" copy; 'after' shows "now that it's done" copy */
+  timing: 'before' | 'after';
 }
 
-export default function DepressionSlider({ value, onChange, disabled = false, label }: DepressionSliderProps) {
+const COPY = {
+  before: {
+    heading: 'How depressed are you feeling right now?',
+    sub: 'Rate before starting · 0 = not at all · 100 = as bad as it gets',
+  },
+  after: {
+    heading: 'How depressed are you feeling now it\'s done?',
+    sub: 'Rate after finishing · 0 = not at all · 100 = as bad as it gets',
+  },
+};
+
+export default function DepressionSlider({ value, onChange, disabled = false, timing }: DepressionSliderProps) {
   const hasValue = value !== null;
+  const copy = COPY[timing];
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
+    <div className="rounded-xl bg-[#F8F5FF] border border-[#E0DAF5] p-3 space-y-2">
+      <div className="flex items-start justify-between gap-2">
         <div>
-          <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">{label}</p>
-          <p className="text-[10px] text-[#C8C4BE] mt-0.5">Depression level · 0 = none · 100 = most you've felt</p>
+          <p className="text-xs font-semibold text-[#6A5A9C]">{copy.heading}</p>
+          <p className="text-[10px] text-[#A89CC8] mt-0.5">{copy.sub}</p>
         </div>
         {hasValue ? (
-          <span className="px-2.5 py-1 rounded-lg bg-[#F0F7EE] border border-[#C8DCC4] text-[#3D5A4C] text-sm font-bold min-w-[3rem] text-center">
+          <span className="px-2.5 py-1 rounded-lg bg-[#EDE8FF] border border-[#C8C0F0] text-[#6A5A9C] text-sm font-bold min-w-[3rem] text-center shrink-0">
             {value}
           </span>
         ) : (
-          <span className="text-xs text-[#C8C4BE] italic">not rated</span>
+          <span className="text-xs text-[#C8C4BE] italic shrink-0">not rated</span>
         )}
       </div>
       {!hasValue && !disabled ? (
         <button
           onClick={() => onChange(50)}
-          className="w-full py-2 rounded-xl border-2 border-dashed border-[#D8DCC4] text-xs text-[#9E9B97] hover:border-[#7D9B76] hover:text-[#3D5A4C] transition-colors"
+          className="w-full py-2 rounded-lg border-2 border-dashed border-[#C8C0F0] text-xs text-[#9E98C8] hover:border-[#6A5A9C] hover:text-[#6A5A9C] transition-colors"
         >
           Tap to rate
         </button>
@@ -39,8 +52,8 @@ export default function DepressionSlider({ value, onChange, disabled = false, la
           value={value ?? 50}
           disabled={disabled}
           onChange={e => onChange(parseInt(e.target.value, 10))}
-          className="w-full h-2 rounded-full appearance-none cursor-pointer accent-[#7D9B76] disabled:opacity-50 disabled:cursor-not-allowed"
-          style={{ background: `linear-gradient(to right, #7D9B76 ${value ?? 50}%, #E8E4DE ${value ?? 50}%)` }}
+          className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+          style={{ accentColor: '#6A5A9C', background: `linear-gradient(to right, #6A5A9C ${value ?? 50}%, #E0DAF5 ${value ?? 50}%)` }}
         />
       )}
     </div>

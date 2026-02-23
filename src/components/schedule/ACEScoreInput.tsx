@@ -14,6 +14,8 @@ const ACE_FIELDS = [
     icon: Zap,
     colour: 'text-[#7B4A10]',
     bg: 'bg-[#FFF0DC]',
+    selectedBg: 'bg-[#D4A030]',
+    selectedText: 'text-white',
     desc: 'Getting something done',
   },
   {
@@ -22,6 +24,8 @@ const ACE_FIELDS = [
     icon: Users,
     colour: 'text-[#2D5A3A]',
     bg: 'bg-[#D8EDD8]',
+    selectedBg: 'bg-[#7D9B76]',
+    selectedText: 'text-white',
     desc: 'Feeling close to others',
   },
   {
@@ -30,56 +34,58 @@ const ACE_FIELDS = [
     icon: Heart,
     colour: 'text-[#9B3A45]',
     bg: 'bg-[#FDE8E8]',
+    selectedBg: 'bg-[#C17C5A]',
+    selectedText: 'text-white',
     desc: 'Pleasure and fun',
   },
 ] as const;
 
-export default function ACEScoreInput({ label, values, onChange, disabled = false }: ACEScoreInputProps) {
-  const handleStep = (key: 'achievement' | 'connection' | 'enjoyment', direction: 1 | -1) => {
-    const current = values[key];
-    if (current === null) {
-      onChange(key, direction === 1 ? 1 : 0);
-    } else {
-      const next = Math.max(0, Math.min(10, current + direction));
-      onChange(key, next);
-    }
-  };
+const SCORES = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
+export default function ACEScoreInput({ label, values, onChange, disabled = false }: ACEScoreInputProps) {
   return (
     <div>
       {label && <p className="text-sm font-semibold text-[#3D5A4C] mb-3">{label}</p>}
-      <div className="space-y-3">
-        {ACE_FIELDS.map(({ key, label: fieldLabel, icon: Icon, colour, bg, desc }) => {
+      <div className="space-y-4">
+        {ACE_FIELDS.map(({ key, label: fieldLabel, icon: Icon, colour, bg, selectedBg, selectedText, desc }) => {
           const val = values[key];
           return (
-            <div key={key} className="flex items-center gap-3">
-              <div className={`w-8 h-8 rounded-lg flex items-center justify-center shrink-0 ${bg}`}>
-                <Icon size={15} className={colour} />
+            <div key={key}>
+              <div className="flex items-center gap-2 mb-2">
+                <div className={`w-7 h-7 rounded-lg flex items-center justify-center shrink-0 ${bg}`}>
+                  <Icon size={14} className={colour} />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs font-medium text-[#3D5A4C]">{fieldLabel}</span>
+                  <span className="text-xs text-[#9E9B97] ml-1.5">{desc}</span>
+                </div>
+                {val === null && !disabled && (
+                  <span className="text-xs text-[#C8C4BE] italic">tap a score</span>
+                )}
               </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-[#3D5A4C]">{fieldLabel}</p>
-                <p className="text-xs text-[#9E9B97]">{desc}</p>
-              </div>
-              <div className="flex items-center gap-2 shrink-0">
-                <button
-                  onClick={() => handleStep(key, -1)}
-                  disabled={disabled || val === 0}
-                  className="w-9 h-9 rounded-lg border border-[#E8E4DE] bg-white flex items-center justify-center text-[#3D5A4C] font-bold text-lg hover:bg-[#F0EBE3] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  aria-label={`Decrease ${fieldLabel}`}
-                >
-                  −
-                </button>
-                <span className="w-8 text-center text-[#3D5A4C] font-bold text-lg">
-                  {val === null ? '–' : val}
-                </span>
-                <button
-                  onClick={() => handleStep(key, 1)}
-                  disabled={disabled || val === 10}
-                  className="w-9 h-9 rounded-lg border border-[#E8E4DE] bg-white flex items-center justify-center text-[#3D5A4C] font-bold text-lg hover:bg-[#F0EBE3] disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
-                  aria-label={`Increase ${fieldLabel}`}
-                >
-                  +
-                </button>
+              <div className="flex gap-1">
+                {SCORES.map(n => {
+                  const isSelected = val === n;
+                  return (
+                    <button
+                      key={n}
+                      onClick={() => !disabled && onChange(key, n)}
+                      disabled={disabled}
+                      aria-label={`${fieldLabel} ${n}`}
+                      className={`flex-1 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                        disabled
+                          ? isSelected
+                            ? `${selectedBg} ${selectedText} opacity-60`
+                            : 'bg-[#F0EBE3] text-[#C8C4BE] opacity-60'
+                          : isSelected
+                          ? `${selectedBg} ${selectedText} shadow-sm`
+                          : 'bg-[#F0EBE3] text-[#9E9B97] hover:bg-[#E8E3DB] hover:text-[#3D5A4C]'
+                      }`}
+                    >
+                      {n}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           );

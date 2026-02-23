@@ -124,7 +124,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
               Expected scores (before)
             </p>
             <DepressionSlider
-              label="Before this activity"
+              timing="before"
               value={activity.pre_depression ?? null}
               onChange={v => onUpdate(activity.id, { pre_depression: v })}
               disabled={activity.completed}
@@ -153,7 +153,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                 Actual scores (after)
               </p>
               <DepressionSlider
-                label="After this activity"
+                timing="after"
                 value={activity.post_depression ?? null}
                 onChange={v => onUpdate(activity.id, { post_depression: v })}
               />
