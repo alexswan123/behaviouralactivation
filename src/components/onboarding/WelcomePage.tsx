@@ -155,7 +155,14 @@ export default function WelcomePage() {
             </div>
           ) : (
             <button
-              onClick={() => isInstalled ? setShowDatePicker(true) : setShowBeforeYouBegin(true)}
+              onClick={() => {
+                // Skip interstitial if nothing to prompt for
+                if (isInstalled && notifications.hasPermission()) {
+                  setShowDatePicker(true);
+                } else {
+                  setShowBeforeYouBegin(true);
+                }
+              }}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
               Start my {spell.programme.toLowerCase()}
