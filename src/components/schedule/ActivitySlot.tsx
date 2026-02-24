@@ -344,7 +344,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                   disabled={!hasPreScores || saving}
                   className="w-full py-3 rounded-xl bg-[#7D9B76] text-white font-semibold text-sm hover:bg-[#5C7A55] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPreScores ? 'Add expected scores first' : 'I\u2019ve done this'}
+                  {!hasPreScores ? 'Add expected scores first' : 'I did it!'}
                 </button>
               ) : showPostScores && !fullyComplete ? (
                 <button
