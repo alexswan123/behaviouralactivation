@@ -7,7 +7,14 @@ import { categoryColours, categoryLabels } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
 import { track } from '../../lib/analytics';
 
-const encouragingMessages = ['Nice work!', 'Well done!', 'Keep going!', 'You did it!'];
+const encouragingMessages = [
+  'You followed through — that matters.',
+  'You showed up for yourself today.',
+  'Done. That\u2019s one more data point about what works for you.',
+  'You did what you planned. That\u2019s the work.',
+  'Completed. Every activity is information.',
+  'You took action — even when it\u2019s hard, that counts.',
+];
 
 interface ActivitySlotProps {
   activity: ScheduledActivity;
@@ -62,18 +69,22 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   }, [activity.id, onUpdate]);
 
   const handleMarkDone = async () => {
+    // Capture button position before it unmounts after state update
+    let originX = 0.5;
+    let originY = 0.5;
+    if (doneButtonRef.current) {
+      const rect = doneButtonRef.current.getBoundingClientRect();
+      originX = (rect.left + rect.width / 2) / window.innerWidth;
+      originY = (rect.top + rect.height / 2) / window.innerHeight;
+    }
+
     setSaving(true);
     try {
       await onUpdate(activity.id, { completed: true });
       track.activityCompleted({ category: activity.category ?? null });
 
-      // Fire confetti from button position
-      if (doneButtonRef.current) {
-        const rect = doneButtonRef.current.getBoundingClientRect();
-        const x = (rect.left + rect.width / 2) / window.innerWidth;
-        const y = (rect.top + rect.height / 2) / window.innerHeight;
-        confetti({ origin: { x, y }, particleCount: 60, spread: 55, colors: ['#7D9B76', '#A8C8B0', '#C8DCC4', '#F4D06F'] });
-      }
+      // Fire confetti from captured button position
+      confetti({ origin: { x: originX, y: originY }, particleCount: 60, spread: 55, colors: ['#7D9B76', '#A8C8B0', '#C8DCC4', '#F4D06F'] });
 
       // Show encouraging message, then reveal post-scores
       const msg = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
@@ -170,7 +181,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
             </button>
           ) : celebrationMessage ? (
             <p
-              className="text-center text-lg font-bold text-[#7D9B76] py-3"
+              className="text-center text-sm font-semibold text-[#7D9B76] py-3"
               style={{ animation: 'celebrate-in 0.3s ease-out' }}
             >
               {celebrationMessage}
