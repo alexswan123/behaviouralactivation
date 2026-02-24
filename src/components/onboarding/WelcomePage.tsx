@@ -42,12 +42,6 @@ export default function WelcomePage() {
     setShowDatePicker(true);
   };
 
-  const handleEnableReminders = async () => {
-    await notifications.requestPermission();
-    setShowBeforeYouBegin(false);
-    setShowDatePicker(true);
-  };
-
   const handleSkip = () => {
     setShowBeforeYouBegin(false);
     setShowDatePicker(true);
@@ -55,46 +49,35 @@ export default function WelcomePage() {
 
   const isMobileNotInstalled = !isInstalled && (canPrompt || isIOS);
 
+  const handleStartClick = () => {
+    if (isMobileNotInstalled) {
+      setShowBeforeYouBegin(true);
+    } else {
+      setShowDatePicker(true);
+    }
+  };
+
   const renderInterstitial = () => (
     <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm mx-4 text-center">
       <p className="text-[#3D5A4C] font-semibold text-lg mb-2">Before you begin</p>
-      {isMobileNotInstalled ? (
-        <>
-          <p className="text-[#9E9B97] text-sm mb-5">
-            To get the most out of Bloom, we recommend adding it to your home screen for reminders and easy access.
+      <p className="text-[#9E9B97] text-sm mb-5">
+        To get the most out of Bloom, we recommend adding it to your home screen for reminders and easy access.
+      </p>
+      {isIOS ? (
+        <div className="bg-[#F5F2ED] rounded-xl p-4 mb-4 text-left">
+          <p className="text-[#3D5A4C] text-sm font-medium mb-2">Add to home screen:</p>
+          <p className="text-[#9E9B97] text-sm">
+            Tap <Share size={14} className="inline -mt-0.5" /> Share, then scroll down and tap <span className="font-medium text-[#3D5A4C]">Add to Home Screen</span>.
           </p>
-          {isIOS ? (
-            <div className="bg-[#F5F2ED] rounded-xl p-4 mb-4 text-left">
-              <p className="text-[#3D5A4C] text-sm font-medium mb-2">Add to home screen:</p>
-              <p className="text-[#9E9B97] text-sm">
-                Tap <Share size={14} className="inline -mt-0.5" /> Share, then scroll down and tap <span className="font-medium text-[#3D5A4C]">Add to Home Screen</span>.
-              </p>
-            </div>
-          ) : (
-            <button
-              onClick={handleInstall}
-              className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
-            >
-              <Download size={18} />
-              Add to home screen
-            </button>
-          )}
-        </>
+        </div>
       ) : (
-        <>
-          <p className="text-[#9E9B97] text-sm mb-5">
-            To get the most out of Bloom, we recommend enabling reminders so you don't miss your activities.
-          </p>
-          {notifications.isSupported() && (
-            <button
-              onClick={handleEnableReminders}
-              className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
-            >
-              <Bell size={18} />
-              Enable reminders
-            </button>
-          )}
-        </>
+        <button
+          onClick={handleInstall}
+          className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
+        >
+          <Download size={18} />
+          Add to home screen
+        </button>
       )}
       <button
         onClick={handleSkip}
@@ -182,7 +165,7 @@ export default function WelcomePage() {
             </div>
           ) : (
             <button
-              onClick={() => setShowBeforeYouBegin(true)}
+              onClick={handleStartClick}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
               Start my {spell.programme.toLowerCase()}
