@@ -9,7 +9,7 @@ export default defineConfig({
     tailwindcss(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon.svg', 'icon.svg'],
       manifest: {
         name: 'Bloom — Behavioural Activation',
         short_name: 'Bloom',
@@ -21,7 +21,7 @@ export default defineConfig({
         scope: '/',
         icons: [
           {
-            src: '/favicon.svg',
+            src: '/icon.svg',
             sizes: 'any',
             type: 'image/svg+xml',
           },
