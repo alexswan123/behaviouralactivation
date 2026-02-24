@@ -18,12 +18,18 @@ export async function requestPermission(): Promise<boolean> {
   return result === 'granted';
 }
 
-export function showNotification(activityName: string, minutesBefore: number): void {
+export async function showNotification(activityName: string, minutesBefore: number): Promise<void> {
   if (!hasPermission()) return;
-  const n = new Notification('Bloom', {
-    body: `${activityName} starts in ${minutesBefore} minutes`,
-    icon: '/favicon.svg',
-  });
+  const body = `${activityName} starts in ${minutesBefore} minutes`;
+
+  // Use service worker notification when available (required for iOS PWA)
+  if ('serviceWorker' in navigator) {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification('Bloom', { body, icon: '/icon-192.png' });
+    return;
+  }
+
+  const n = new Notification('Bloom', { body, icon: '/favicon.svg' });
   n.onclick = () => {
     window.focus();
     n.close();

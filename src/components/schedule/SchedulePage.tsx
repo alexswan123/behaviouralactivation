@@ -11,6 +11,7 @@ import { addDays, format } from '../../lib/dateUtils';
 import { track } from '../../lib/analytics';
 import { activities as catalogueActivities } from '../../data/activities';
 import { useNotifications } from '../../hooks/useNotifications';
+import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import type { Category } from '../../lib/types';
 
 const DURATION_OPTIONS = [10, 14, 21, 30];
@@ -30,6 +31,7 @@ export default function SchedulePage() {
   const [quickFillCount, setQuickFillCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
   const notifications = useNotifications(activities);
+  const install = useInstallPrompt();
 
   // Close menu on outside click
   useEffect(() => {
@@ -245,21 +247,17 @@ export default function SchedulePage() {
                   <Sparkles size={15} className="text-[#7D9B76]" />
                   Quick fill empty days
                 </button>
-                {notifications.supported && (
-                  <>
-                    <div className="h-px bg-[#EDE8E0]" />
-                    <button
-                      onClick={() => { setDialog('reminders'); setMenuOpen(false); }}
-                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
-                    >
-                      <Bell size={15} className="text-[#7D9B76]" />
-                      Reminders
-                      {notifications.enabled && (
-                        <span className="ml-auto text-xs text-[#7D9B76] font-medium">On</span>
-                      )}
-                    </button>
-                  </>
-                )}
+                <div className="h-px bg-[#EDE8E0]" />
+                <button
+                  onClick={() => { setDialog('reminders'); setMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
+                >
+                  <Bell size={15} className="text-[#7D9B76]" />
+                  Reminders
+                  {notifications.enabled && (
+                    <span className="ml-auto text-xs text-[#7D9B76] font-medium">On</span>
+                  )}
+                </button>
                 <div className="h-px bg-[#EDE8E0]" />
                 <button
                   onClick={handleResetMenu}
@@ -460,11 +458,44 @@ export default function SchedulePage() {
               </button>
             </div>
             <div className="p-6 space-y-4">
-              <p className="text-sm text-[#8A8680]">
-                Get a browser notification before each scheduled activity while Bloom is open.
-              </p>
+              {!notifications.supported ? (
+                /* Notifications not available — show install or calendar guidance */
+                <>
+                  <p className="text-sm text-[#8A8680]">
+                    Notifications aren't available in this browser yet.
+                  </p>
 
-              {notifications.permissionDenied ? (
+                  {install.canPrompt && (
+                    <button
+                      onClick={install.promptInstall}
+                      className="w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 border-[#7D9B76] bg-[#F0F7EE] transition-colors hover:bg-[#E3F0E0]"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-[#3D5A4C]">Install Bloom</p>
+                        <p className="text-xs text-[#8A8680] mt-0.5">Add to your home screen for notifications</p>
+                      </div>
+                      <Download size={16} className="text-[#7D9B76]" />
+                    </button>
+                  )}
+
+                  {install.isIOS && !install.isInstalled && (
+                    <div className="bg-[#F0F7EE] border border-[#D8EDD8] rounded-xl px-4 py-3">
+                      <p className="text-sm font-medium text-[#3D5A4C]">Add to Home Screen</p>
+                      <p className="text-xs text-[#8A8680] mt-1 leading-relaxed">
+                        Tap the share button <span className="inline-block align-middle text-[#3D5A4C]">(&#x2191;&#x25A1;)</span> then
+                        "Add to Home Screen" to enable notifications.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="bg-[#F5F3EE] border border-[#EDE8E0] rounded-xl px-4 py-3">
+                    <p className="text-sm font-medium text-[#3D5A4C]">Use calendar reminders instead</p>
+                    <p className="text-xs text-[#8A8680] mt-1">
+                      Export your schedule as an .ics file — it includes built-in alerts that work with any calendar app.
+                    </p>
+                  </div>
+                </>
+              ) : notifications.permissionDenied ? (
                 <div className="bg-[#FFF5EE] border border-[#E8D5C4] rounded-xl px-4 py-3">
                   <p className="text-sm font-medium text-[#C17C5A]">Notifications blocked</p>
                   <p className="text-xs text-[#C17C5A]/70 mt-1">
@@ -473,6 +504,10 @@ export default function SchedulePage() {
                 </div>
               ) : (
                 <>
+                  <p className="text-sm text-[#8A8680]">
+                    Get a notification before each scheduled activity{install.isInstalled ? '.' : ' while Bloom is open.'}
+                  </p>
+
                   <button
                     onClick={notifications.toggleReminders}
                     className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 transition-colors ${

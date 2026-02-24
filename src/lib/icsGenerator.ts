@@ -74,7 +74,7 @@ export function googleCalendarUrl(act: ScheduledActivity): string {
 
 // ── ICS file builder ──────────────────────────────────────────────────────────
 
-export function generateICS(_schedule: Schedule, activities: ScheduledActivity[], programmeName: string): string {
+export function generateICS(_schedule: Schedule, activities: ScheduledActivity[], programmeName: string, reminderMinutes?: number): string {
   const dtstamp = nowUtc();
 
   const events = activities.map(act => {
@@ -94,6 +94,14 @@ export function generateICS(_schedule: Schedule, activities: ScheduledActivity[]
 
     const uid = `${act.id}@bloom-ba`;
 
+    const alarm = reminderMinutes != null ? [
+      'BEGIN:VALARM',
+      'TRIGGER:-PT' + reminderMinutes + 'M',
+      'ACTION:DISPLAY',
+      fold(`DESCRIPTION:${escapeText(act.activity_name)} starts in ${reminderMinutes} minutes`),
+      'END:VALARM',
+    ] : [];
+
     return [
       'BEGIN:VEVENT',
       fold(`UID:${uid}`),
@@ -104,6 +112,7 @@ export function generateICS(_schedule: Schedule, activities: ScheduledActivity[]
       fold(`DESCRIPTION:${description}`),
       act.category ? fold(`CATEGORIES:${act.category.toUpperCase()}`) : null,
       'STATUS:CONFIRMED',
+      ...alarm,
       'END:VEVENT',
     ].filter(Boolean).join('\r\n');
   });
