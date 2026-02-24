@@ -119,7 +119,9 @@ export default function WelcomePage() {
           </div>
         </div>
         <h1 className="text-4xl font-bold text-[#3D5A4C] mb-4">Bloom</h1>
-        <p className="text-xl text-[#7D9B76] font-medium mb-2">Small steps. Real change.</p>
+        {!showBeforeYouBegin && (
+          <p className="text-xl text-[#7D9B76] font-medium mb-2">Small steps. Real change.</p>
+        )}
         {!showBeforeYouBegin && (
           <p className="text-[#9E9B97] max-w-md mx-auto">
             A gentle 10-day {spell.programme.toLowerCase()} to help you reconnect with activities that bring
