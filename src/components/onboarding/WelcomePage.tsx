@@ -4,6 +4,7 @@ import { ArrowRight, Leaf, Heart, Zap, Users, Download, Bell, Share } from 'luci
 import { useSchedule } from '../../hooks/useSchedule';
 import { useInstallPrompt } from '../../hooks/useInstallPrompt';
 import * as notifications from '../../lib/notifications';
+import { getNotificationPrefs, setNotificationPrefs } from '../../lib/localStore';
 import HowItWorksSection from './HowItWorksSection';
 import { format } from '../../lib/dateUtils';
 import { spell } from '../../lib/spelling';
@@ -41,7 +42,11 @@ export default function WelcomePage() {
   };
 
   const handleEnableReminders = async () => {
-    await notifications.requestPermission();
+    const granted = await notifications.requestPermission();
+    if (granted) {
+      const prefs = getNotificationPrefs();
+      setNotificationPrefs({ ...prefs, enabled: true });
+    }
     setShowBeforeYouBegin(false);
     setShowDatePicker(true);
   };
