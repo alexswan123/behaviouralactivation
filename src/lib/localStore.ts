@@ -3,6 +3,7 @@
  * Mirrors the Supabase schema so the hook interface stays identical.
  */
 import type { Schedule, ScheduledActivity, PastActivity } from './types';
+import { clearSentNotifications } from './notifications';
 
 const KEYS = {
   schedule: 'ba_schedule',
@@ -66,6 +67,7 @@ export function removeActivity(id: string): void {
 export function clearAll(): void {
   localStorage.removeItem(KEYS.schedule);
   localStorage.removeItem(KEYS.activities);
+  clearSentNotifications();
 }
 
 export function clearActivities(): void {
@@ -106,6 +108,25 @@ export function addPastActivity(text: string): PastActivity {
 
 export function removePastActivity(id: string): void {
   write(KEYS.pastActivities, getPastActivities().filter(p => p.id !== id));
+}
+
+// ── Notification preferences ──────────────────────────────────────────────────
+
+const NOTIFICATION_KEY = 'ba_notification_prefs';
+
+export interface NotificationPrefs {
+  enabled: boolean;
+  minutesBefore: number;
+}
+
+const DEFAULT_NOTIFICATION_PREFS: NotificationPrefs = { enabled: false, minutesBefore: 15 };
+
+export function getNotificationPrefs(): NotificationPrefs {
+  return read<NotificationPrefs>(NOTIFICATION_KEY) ?? DEFAULT_NOTIFICATION_PREFS;
+}
+
+export function setNotificationPrefs(prefs: NotificationPrefs): void {
+  write(NOTIFICATION_KEY, prefs);
 }
 
 // ── Favourite catalogue activities ────────────────────────────────────────────

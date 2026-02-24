@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X, Timer, Sparkles } from 'lucide-react';
+import { ArrowRight, CheckCircle2, Download, Settings, CalendarDays, RotateCcw, X, Timer, Sparkles, Bell } from 'lucide-react';
 import { spell } from '../../lib/spelling';
 import { useSchedule } from '../../hooks/useSchedule';
 import { useFavourites } from '../../hooks/useFavourites';
@@ -10,11 +10,13 @@ import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
 import { track } from '../../lib/analytics';
 import { activities as catalogueActivities } from '../../data/activities';
+import { useNotifications } from '../../hooks/useNotifications';
 import type { Category } from '../../lib/types';
 
 const DURATION_OPTIONS = [10, 14, 21, 30];
+const REMINDER_OPTIONS = [5, 10, 15, 30];
 
-type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | 'quickFill' | null;
+type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | 'quickFill' | 'reminders' | null;
 
 export default function SchedulePage() {
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ export default function SchedulePage() {
   const [newDuration, setNewDuration] = useState(10);
   const [quickFillCount, setQuickFillCount] = useState(0);
   const menuRef = useRef<HTMLDivElement>(null);
+  const notifications = useNotifications(activities);
 
   // Close menu on outside click
   useEffect(() => {
@@ -242,6 +245,21 @@ export default function SchedulePage() {
                   <Sparkles size={15} className="text-[#7D9B76]" />
                   Quick fill empty days
                 </button>
+                {notifications.supported && (
+                  <>
+                    <div className="h-px bg-[#EDE8E0]" />
+                    <button
+                      onClick={() => { setDialog('reminders'); setMenuOpen(false); }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-[#3D5A4C] hover:bg-[#F0F7EE] transition-colors text-left"
+                    >
+                      <Bell size={15} className="text-[#7D9B76]" />
+                      Reminders
+                      {notifications.enabled && (
+                        <span className="ml-auto text-xs text-[#7D9B76] font-medium">On</span>
+                      )}
+                    </button>
+                  </>
+                )}
                 <div className="h-px bg-[#EDE8E0]" />
                 <button
                   onClick={handleResetMenu}
@@ -426,6 +444,82 @@ export default function SchedulePage() {
                   Close
                 </button>
               )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Reminders dialog */}
+      {dialog === 'reminders' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm border border-[#DDD8D0]">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-[#EDE8E0]">
+              <h2 className="font-semibold text-[#2A3D32]">Activity reminders</h2>
+              <button onClick={() => setDialog(null)} className="p-1.5 rounded-lg hover:bg-[#F0EBE3] text-[#9E9B97]">
+                <X size={18} />
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <p className="text-sm text-[#8A8680]">
+                Get a browser notification before each scheduled activity while Bloom is open.
+              </p>
+
+              {notifications.permissionDenied ? (
+                <div className="bg-[#FFF5EE] border border-[#E8D5C4] rounded-xl px-4 py-3">
+                  <p className="text-sm font-medium text-[#C17C5A]">Notifications blocked</p>
+                  <p className="text-xs text-[#C17C5A]/70 mt-1">
+                    To enable reminders, allow notifications for this site in your browser settings.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <button
+                    onClick={notifications.toggleReminders}
+                    className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl border-2 transition-colors ${
+                      notifications.enabled
+                        ? 'border-[#7D9B76] bg-[#F0F7EE]'
+                        : 'border-[#EDE8E0] hover:border-[#7D9B76]'
+                    }`}
+                  >
+                    <span className="text-sm font-medium text-[#3D5A4C]">Enable reminders</span>
+                    <div className={`w-10 h-6 rounded-full transition-colors relative ${
+                      notifications.enabled ? 'bg-[#7D9B76]' : 'bg-[#D5D0C8]'
+                    }`}>
+                      <div className={`absolute top-1 w-4 h-4 rounded-full bg-white shadow transition-transform ${
+                        notifications.enabled ? 'translate-x-5' : 'translate-x-1'
+                      }`} />
+                    </div>
+                  </button>
+
+                  {notifications.enabled && (
+                    <div>
+                      <p className="text-xs font-medium text-[#8A8680] mb-2">Remind me</p>
+                      <div className="grid grid-cols-4 gap-2">
+                        {REMINDER_OPTIONS.map(min => (
+                          <button
+                            key={min}
+                            onClick={() => notifications.setMinutesBefore(min)}
+                            className={`py-2.5 rounded-xl border-2 text-xs font-medium transition-colors ${
+                              notifications.minutesBefore === min
+                                ? 'border-[#3D5A4C] bg-[#F0F7EE] text-[#3D5A4C]'
+                                : 'border-[#EDE8E0] text-[#8A8680] hover:border-[#7D9B76] hover:text-[#3D5A4C]'
+                            }`}
+                          >
+                            {min} min
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </>
+              )}
+
+              <button
+                onClick={() => setDialog(null)}
+                className="w-full py-2.5 text-sm text-[#8A8680] hover:text-[#3D5A4C] transition-colors"
+              >
+                Done
+              </button>
             </div>
           </div>
         </div>

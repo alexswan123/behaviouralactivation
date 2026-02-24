@@ -79,4 +79,14 @@ export const track = {
   programmeLengthChanged(opts: { from: number; to: number }) {
     posthog.capture('programme_length_changed', opts);
   },
+
+  /** User enabled activity reminders */
+  remindersEnabled() {
+    posthog.capture('reminders_enabled');
+  },
+
+  /** User disabled activity reminders */
+  remindersDisabled() {
+    posthog.capture('reminders_disabled');
+  },
 };
