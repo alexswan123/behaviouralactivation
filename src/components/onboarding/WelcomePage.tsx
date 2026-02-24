@@ -78,12 +78,6 @@ export default function WelcomePage() {
             </button>
           )}
         </>
-      ) : isInstalled ? (
-        <>
-          <p className="text-[#9E9B97] text-sm mb-5">
-            You've installed Bloom as an app — nice! For the best experience, open it from your home screen.
-          </p>
-        </>
       ) : (
         <>
           <p className="text-[#9E9B97] text-sm mb-5">
@@ -104,7 +98,7 @@ export default function WelcomePage() {
         onClick={handleSkip}
         className="text-[#9E9B97] text-sm hover:text-[#3D5A4C] transition-colors"
       >
-        {isInstalled ? 'Continue here' : 'Continue without'}
+        Continue without
       </button>
     </div>
   );
@@ -161,7 +155,7 @@ export default function WelcomePage() {
             </div>
           ) : (
             <button
-              onClick={() => setShowBeforeYouBegin(true)}
+              onClick={() => isInstalled ? setShowDatePicker(true) : setShowBeforeYouBegin(true)}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
               Start my {spell.programme.toLowerCase()}
