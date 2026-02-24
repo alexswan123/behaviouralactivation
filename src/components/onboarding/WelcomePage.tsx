@@ -142,25 +142,34 @@ export default function WelcomePage() {
                 onChange={e => setStartDate(e.target.value)}
                 className="w-full border border-[#E8E4DE] rounded-lg px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76] mb-4"
               />
-              {notifications.isSupported() && !remindersEnabled && (
+              {notifications.isSupported() && (
                 <button
+                  type="button"
                   onClick={async () => {
+                    if (remindersEnabled) return;
                     const granted = await notifications.requestPermission();
                     if (granted) setRemindersEnabled(true);
                   }}
-                  className="w-full flex items-center gap-3 bg-[#F5F2ED] rounded-xl px-4 py-3 mb-4 text-left hover:bg-[#EDE8E0] transition-colors"
+                  className="w-full flex items-center justify-between rounded-xl px-4 py-3 mb-4 bg-[#F5F2ED] text-left"
                 >
-                  <Bell size={16} className="text-[#7D9B76] shrink-0" />
-                  <span className="text-sm text-[#3D5A4C]">
-                    Enable reminders <span className="text-[#9E9B97]">(recommended)</span>
+                  <span className="flex items-center gap-2">
+                    <Bell size={16} className={remindersEnabled ? 'text-[#2D5A3A]' : 'text-[#7D9B76]'} />
+                    <span className="text-sm text-[#3D5A4C]">
+                      Reminders {!remindersEnabled && <span className="text-[#9E9B97]">(recommended)</span>}
+                    </span>
+                  </span>
+                  <span
+                    className={`relative inline-flex h-6 w-11 shrink-0 rounded-full transition-colors ${
+                      remindersEnabled ? 'bg-[#7D9B76]' : 'bg-[#D5D3CF]'
+                    }`}
+                  >
+                    <span
+                      className={`inline-block h-5 w-5 rounded-full bg-white shadow transform transition-transform mt-0.5 ${
+                        remindersEnabled ? 'translate-x-[22px]' : 'translate-x-0.5'
+                      }`}
+                    />
                   </span>
                 </button>
-              )}
-              {remindersEnabled && (
-                <div className="flex items-center gap-2 bg-[#D8EDD8] rounded-xl px-4 py-3 mb-4">
-                  <Bell size={16} className="text-[#2D5A3A] shrink-0" />
-                  <span className="text-sm text-[#2D5A3A]">Reminders enabled</span>
-                </div>
               )}
               <button
                 onClick={handleStart}
