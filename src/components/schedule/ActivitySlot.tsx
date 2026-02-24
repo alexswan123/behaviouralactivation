@@ -1,10 +1,13 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useRef } from 'react';
 import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 import ACEScoreInput from './ACEScoreInput';
 import DepressionSlider from './DepressionSlider';
 import { categoryColours, categoryLabels } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
 import { track } from '../../lib/analytics';
+
+const encouragingMessages = ['Nice work!', 'Well done!', 'Keep going!', 'You did it!'];
 
 interface ActivitySlotProps {
   activity: ScheduledActivity;
@@ -17,6 +20,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   const [expanded, setExpanded] = useState(initialExpanded);
   const [saving, setSaving] = useState(false);
   const [showPostScores, setShowPostScores] = useState(activity.completed);
+  const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
+  const doneButtonRef = useRef<HTMLButtonElement>(null);
 
   const colours = activity.category ? categoryColours[activity.category] : null;
 
@@ -61,7 +66,22 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
     try {
       await onUpdate(activity.id, { completed: true });
       track.activityCompleted({ category: activity.category ?? null });
-      setShowPostScores(true);
+
+      // Fire confetti from button position
+      if (doneButtonRef.current) {
+        const rect = doneButtonRef.current.getBoundingClientRect();
+        const x = (rect.left + rect.width / 2) / window.innerWidth;
+        const y = (rect.top + rect.height / 2) / window.innerHeight;
+        confetti({ origin: { x, y }, particleCount: 60, spread: 55, colors: ['#7D9B76', '#A8C8B0', '#C8DCC4', '#F4D06F'] });
+      }
+
+      // Show encouraging message, then reveal post-scores
+      const msg = encouragingMessages[Math.floor(Math.random() * encouragingMessages.length)];
+      setCelebrationMessage(msg);
+      setTimeout(() => {
+        setCelebrationMessage(null);
+        setShowPostScores(true);
+      }, 2000);
     } finally {
       setSaving(false);
     }
@@ -139,14 +159,22 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
           </div>
 
           {/* Mark done / post scores */}
-          {!activity.completed && !showPostScores ? (
+          {!activity.completed && !showPostScores && !celebrationMessage ? (
             <button
+              ref={doneButtonRef}
               onClick={handleMarkDone}
               disabled={!hasPreScores || saving}
               className="w-full py-3 rounded-xl bg-[#7D9B76] text-white font-semibold text-sm hover:bg-[#5C7A55] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               {!hasPreScores ? 'Add expected scores first' : 'Mark as done'}
             </button>
+          ) : celebrationMessage ? (
+            <p
+              className="text-center text-lg font-bold text-[#7D9B76] py-3"
+              style={{ animation: 'celebrate-in 0.3s ease-out' }}
+            >
+              {celebrationMessage}
+            </p>
           ) : (
             <div>
               <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
