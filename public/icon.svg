@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <!-- Full-bleed square background — no rounded corners -->
+  <rect width="512" height="512" fill="#3D5A4C"/>
+  <!-- Leaf shape scaled larger for regular (non-maskable) icon -->
+  <g transform="translate(256,256) scale(15.5) translate(-16,-16)">
+    <path
+      d="M16 7
+         C16 7 23 10 23 17
+         C23 21.5 20 24.5 16 25
+         C12 24.5 9 21.5 9 17
+         C9 10 16 7 16 7Z"
+      fill="#7D9B76"
+    />
+    <line x1="16" y1="10" x2="16" y2="24" stroke="#3D5A4C" stroke-width="1.2" stroke-linecap="round"/>
+    <line x1="16" y1="16" x2="20" y2="13" stroke="#3D5A4C" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="16" y1="19" x2="20" y2="17" stroke="#3D5A4C" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="16" y1="16" x2="12" y2="13" stroke="#3D5A4C" stroke-width="0.8" stroke-linecap="round"/>
+    <line x1="16" y1="19" x2="12" y2="17" stroke="#3D5A4C" stroke-width="0.8" stroke-linecap="round"/>
+  </g>
+</svg>

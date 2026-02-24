@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { NavLink } from 'react-router-dom';
-import { Calendar, BookOpen, BarChart2, Leaf, Stethoscope, Menu, X } from 'lucide-react';
+import { Calendar, BookOpen, BarChart2, Leaf, Menu, X } from 'lucide-react';
 
 const NAV_ITEMS = [
   { to: '/schedule', icon: Calendar, label: 'Schedule' },
   { to: '/catalogue', icon: BookOpen, label: 'Activities' },
   { to: '/progress', icon: BarChart2, label: 'Progress' },
-  { to: '/for-clinicians', icon: Stethoscope, label: 'For clinicians' },
 ] as const;
 
 export default function Nav() {

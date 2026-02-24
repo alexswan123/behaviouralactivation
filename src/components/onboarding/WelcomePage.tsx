@@ -1,7 +1,10 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Leaf, Heart, Zap, Users } from 'lucide-react';
+import { ArrowRight, Leaf, Heart, Zap, Users, Download, Bell, Share } from 'lucide-react';
 import { useSchedule } from '../../hooks/useSchedule';
+import { useInstallPrompt } from '../../hooks/useInstallPrompt';
+import * as notifications from '../../lib/notifications';
+import { getNotificationPrefs, setNotificationPrefs } from '../../lib/localStore';
 import HowItWorksSection from './HowItWorksSection';
 import { format } from '../../lib/dateUtils';
 import { spell } from '../../lib/spelling';
@@ -10,10 +13,11 @@ import { track } from '../../lib/analytics';
 export default function WelcomePage() {
   const navigate = useNavigate();
   const { createSchedule, schedule } = useSchedule();
+  const { isInstalled, canPrompt, isIOS, promptInstall } = useInstallPrompt();
+  const [showBeforeYouBegin, setShowBeforeYouBegin] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
   const [startDate, setStartDate] = useState(format(new Date()));
   const [creating, setCreating] = useState(false);
-
   const handleStart = async () => {
     if (schedule) {
       track.programmeContinued();
@@ -31,6 +35,79 @@ export default function WelcomePage() {
     }
   };
 
+  const handleInstall = async () => {
+    await promptInstall();
+    setShowBeforeYouBegin(false);
+    setShowDatePicker(true);
+  };
+
+  const handleEnableReminders = async () => {
+    const granted = await notifications.requestPermission();
+    if (granted) {
+      const prefs = getNotificationPrefs();
+      setNotificationPrefs({ ...prefs, enabled: true });
+    }
+    setShowBeforeYouBegin(false);
+    setShowDatePicker(true);
+  };
+
+  const handleSkip = () => {
+    setShowBeforeYouBegin(false);
+    setShowDatePicker(true);
+  };
+
+  const canInstall = !isInstalled && (canPrompt || isIOS);
+
+  const renderInterstitial = () => (
+    <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm mx-4 text-center">
+      <p className="text-[#3D5A4C] font-semibold text-lg mb-2">Before you begin</p>
+      {canInstall ? (
+        <>
+          <p className="text-[#9E9B97] text-sm mb-5">
+            To get the most out of Bloom, we recommend installing it as an app for reminders and easy access.
+          </p>
+          {isIOS ? (
+            <div className="bg-[#F5F2ED] rounded-xl p-4 mb-4 text-left">
+              <p className="text-[#3D5A4C] text-sm font-medium mb-2">Add to home screen:</p>
+              <p className="text-[#9E9B97] text-sm">
+                Tap the <Share size={14} className="inline -mt-0.5" /> share button at the bottom of your screen, then tap <span className="font-medium text-[#3D5A4C]">Add to Home Screen</span>.
+              </p>
+            </div>
+          ) : (
+            <button
+              onClick={handleInstall}
+              className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
+            >
+              <Download size={18} />
+              Install Bloom
+            </button>
+          )}
+        </>
+      ) : (
+        <>
+          <p className="text-[#9E9B97] text-sm mb-5">
+            To get the most out of Bloom, we recommend enabling reminders so you don't miss your activities.
+          </p>
+          {notifications.isSupported() && (
+            <button
+              onClick={handleEnableReminders}
+              className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
+            >
+              <Bell size={18} />
+              Enable reminders
+            </button>
+          )}
+        </>
+      )}
+      <button
+        onClick={handleSkip}
+        className="text-[#9E9B97] text-sm hover:text-[#3D5A4C] transition-colors"
+      >
+        Continue without
+      </button>
+    </div>
+  );
+
   return (
     <div className="max-w-2xl mx-auto">
       {/* Hero */}
@@ -41,22 +118,28 @@ export default function WelcomePage() {
           </div>
         </div>
         <h1 className="text-4xl font-bold text-[#3D5A4C] mb-4">Bloom</h1>
-        <p className="text-xl text-[#7D9B76] font-medium mb-2">Small steps. Real change.</p>
-        <p className="text-[#9E9B97] max-w-md mx-auto">
-          A gentle 10-day {spell.programme.toLowerCase()} to help you reconnect with activities that bring
-          achievement, connection, and enjoyment back into your days.
-        </p>
+        {!showBeforeYouBegin && (
+          <p className="text-xl text-[#7D9B76] font-medium mb-2">Small steps. Real change.</p>
+        )}
+        {!showBeforeYouBegin && (
+          <p className="text-[#9E9B97] max-w-md mx-auto">
+            A gentle 10-day {spell.programme.toLowerCase()} to help you reconnect with activities that bring
+            achievement, connection, and enjoyment back into your days.
+          </p>
+        )}
 
         <div className="mt-10 flex justify-center gap-3">
-          {!showDatePicker && !schedule ? (
+          {schedule ? (
             <button
-              onClick={() => setShowDatePicker(true)}
+              onClick={() => navigate('/schedule')}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
-              Start my {spell.programme.toLowerCase()}
+              Continue my {spell.programme.toLowerCase()}
               <ArrowRight size={20} />
             </button>
-          ) : showDatePicker && !schedule ? (
+          ) : showBeforeYouBegin && !showDatePicker ? (
+            renderInterstitial()
+          ) : showDatePicker ? (
             <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm mx-4">
               <p className="text-[#3D5A4C] font-semibold mb-3">When does Day 1 start?</p>
               <input
@@ -77,10 +160,17 @@ export default function WelcomePage() {
             </div>
           ) : (
             <button
-              onClick={() => navigate('/schedule')}
+              onClick={() => {
+                // Skip interstitial if nothing to prompt for
+                if (isInstalled && notifications.hasPermission()) {
+                  setShowDatePicker(true);
+                } else {
+                  setShowBeforeYouBegin(true);
+                }
+              }}
               className="flex items-center gap-2 bg-[#7D9B76] text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-[#5C7A55] transition-colors shadow-md"
             >
-              Continue my {spell.programme.toLowerCase()}
+              Start my {spell.programme.toLowerCase()}
               <ArrowRight size={20} />
             </button>
           )}
