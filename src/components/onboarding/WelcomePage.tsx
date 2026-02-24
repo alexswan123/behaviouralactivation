@@ -51,15 +51,15 @@ export default function WelcomePage() {
     setShowDatePicker(true);
   };
 
-  const isMobileNotInstalled = !isInstalled && (canPrompt || isIOS);
+  const canInstall = !isInstalled && (canPrompt || isIOS);
 
   const renderInterstitial = () => (
     <div className="bg-white rounded-2xl shadow-md border border-[#E8E4DE] p-6 w-full max-w-sm mx-4 text-center">
       <p className="text-[#3D5A4C] font-semibold text-lg mb-2">Before you begin</p>
-      {isMobileNotInstalled ? (
+      {canInstall ? (
         <>
           <p className="text-[#9E9B97] text-sm mb-5">
-            To get the most out of Bloom, we recommend adding it to your home screen for reminders and easy access.
+            To get the most out of Bloom, we recommend installing it as an app for reminders and easy access.
           </p>
           {isIOS ? (
             <div className="bg-[#F5F2ED] rounded-xl p-4 mb-4 text-left">
@@ -74,7 +74,7 @@ export default function WelcomePage() {
               className="w-full flex items-center justify-center gap-2 bg-[#7D9B76] text-white px-6 py-3 rounded-xl font-semibold hover:bg-[#5C7A55] transition-colors mb-3"
             >
               <Download size={18} />
-              Add to home screen
+              Install Bloom
             </button>
           )}
         </>
