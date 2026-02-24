@@ -33,19 +33,28 @@ export default function TodayFocus({ dayNumber, date, activities, onAdd, onUpdat
     <>
       <div className="mb-8 rounded-2xl overflow-hidden border-2 border-[#7D9B76] shadow-[0_4px_28px_rgba(125,155,118,0.18)]">
         {/* Header */}
-        <div className="bg-[#7D9B76] px-6 py-5 flex items-center justify-between">
-          <div className="flex items-start gap-4">
+        <div className="bg-[#7D9B76] px-5 py-5 sm:px-6">
+          <div className="flex items-start gap-3 sm:gap-4">
             <div className="w-10 h-10 bg-white/20 rounded-xl flex items-center justify-center shrink-0 mt-0.5">
               <Sun size={20} className="text-white" />
             </div>
-            <div>
-              <div className="flex items-center gap-2 mb-0.5">
-                <span className="px-2.5 py-0.5 bg-white/25 text-white text-xs font-bold rounded-full tracking-wide">
-                  Today
-                </span>
-                <span className="text-[#C4E8C4] text-sm font-medium">Day {dayNumber}</span>
+            <div className="flex-1 min-w-0">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 mb-0.5">
+                  <span className="px-2.5 py-0.5 bg-white/25 text-white text-xs font-bold rounded-full tracking-wide">
+                    Today
+                  </span>
+                  <span className="text-[#C4E8C4] text-sm font-medium whitespace-nowrap">Day {dayNumber}</span>
+                </div>
+                <button
+                  onClick={() => setShowModal(true)}
+                  className="hidden sm:flex items-center gap-1.5 px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+                >
+                  <Plus size={15} />
+                  Add activity
+                </button>
               </div>
-              <p className="text-white font-bold text-xl">{weekday}, {dateLabel}</p>
+              <p className="text-white font-bold text-lg sm:text-xl truncate">{weekday}, {dateLabel}</p>
               {activities.length > 0 && (
                 <p className="text-[#C4E8C4] text-sm mt-0.5">
                   {completedCount} of {activities.length} {activities.length === 1 ? 'activity' : 'activities'} done
@@ -55,7 +64,7 @@ export default function TodayFocus({ dayNumber, date, activities, onAdd, onUpdat
           </div>
           <button
             onClick={() => setShowModal(true)}
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-xl transition-colors shrink-0"
+            className="sm:hidden flex items-center justify-center gap-1.5 w-full mt-3 px-4 py-2.5 bg-white/20 hover:bg-white/30 text-white text-sm font-semibold rounded-xl transition-colors"
           >
             <Plus size={15} />
             Add activity

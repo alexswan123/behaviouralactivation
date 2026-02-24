@@ -7,6 +7,7 @@ import { pdf } from '@react-pdf/renderer';
 import type { Schedule, ScheduledActivity } from '../../lib/types';
 import { spell } from '../../lib/spelling';
 import { generateICS, googleCalendarUrl } from '../../lib/icsGenerator';
+import { getNotificationPrefs } from '../../lib/localStore';
 import SchedulePDF from './SchedulePDF';
 import { track } from '../../lib/analytics';
 
@@ -99,7 +100,9 @@ export default function ExportModal({ schedule, activities, onClose }: ExportMod
   // ── Handlers ────────────────────────────────────────────────────────────────
 
   const handleDownloadICS = () => {
-    const ics = generateICS(schedule, activities, spell.programme);
+    const notifPrefs = getNotificationPrefs();
+    const reminderMin = notifPrefs.enabled ? notifPrefs.minutesBefore : 15;
+    const ics = generateICS(schedule, activities, spell.programme, reminderMin);
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url  = URL.createObjectURL(blob);
     const a = document.createElement('a');
