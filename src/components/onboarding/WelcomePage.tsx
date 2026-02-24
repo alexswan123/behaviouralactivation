@@ -129,7 +129,14 @@ export default function WelcomePage() {
                 <button
                   type="button"
                   onClick={async () => {
-                    if (remindersEnabled) return;
+                    if (remindersEnabled) {
+                      setRemindersEnabled(false);
+                      return;
+                    }
+                    if (notifications.hasPermission()) {
+                      setRemindersEnabled(true);
+                      return;
+                    }
                     const granted = await notifications.requestPermission();
                     if (granted) setRemindersEnabled(true);
                   }}
