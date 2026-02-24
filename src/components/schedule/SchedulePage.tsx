@@ -490,6 +490,11 @@ export default function SchedulePage() {
                       }`} />
                     </div>
                   </button>
+                  {!notifications.enabled && (
+                    <p className="text-xs text-[#ABA8A3]">
+                      Your browser will ask you to allow notifications — tap "Allow" when prompted.
+                    </p>
+                  )}
 
                   {notifications.enabled && (
                     <div>
