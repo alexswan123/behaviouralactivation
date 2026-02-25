@@ -56,12 +56,14 @@ export default function ACEScoreInput({ label, values, onChange, disabled = fals
                   <Icon size={14} className={colour} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs font-medium text-[#3D5A4C]">{fieldLabel}</span>
-                  <span className="text-xs text-[#9E9B97] ml-1.5">{desc}</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-[#3D5A4C]">{fieldLabel}</span>
+                    {val === null && !disabled && (
+                      <span className="text-xs text-[#C8C4BE] italic">tap a score</span>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#9E9B97] block">{desc}</span>
                 </div>
-                {val === null && !disabled && (
-                  <span className="text-xs text-[#C8C4BE] italic">tap a score</span>
-                )}
               </div>
               <div className="flex gap-1">
                 {SCORES.map(n => {
