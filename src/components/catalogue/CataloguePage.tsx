@@ -215,16 +215,16 @@ export default function CataloguePage() {
           </div>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {helpedMost.map(({ activity, avg }) => (
-              <div key={activity.id} className="relative">
+              <div key={activity.id} className="flex flex-col gap-1.5">
+                <span className="self-start px-2 py-0.5 rounded-md bg-[#F0F7EE] border border-[#C8DCC4] text-[10px] font-semibold text-[#5C7A55]">
+                  ⬆ +{avg.toFixed(1)} avg lift
+                </span>
                 <ActivityCard
                   activity={activity}
                   onAdd={setSelectedActivity}
                   isFavourite={isFavourite(activity.id)}
                   onToggleFavourite={toggleFav}
                 />
-                <span className="absolute top-2 left-2 px-2 py-0.5 rounded-md bg-[#F0F7EE] border border-[#C8DCC4] text-[10px] font-semibold text-[#5C7A55]">
-                  ⬆ +{avg.toFixed(1)} avg lift
-                </span>
               </div>
             ))}
           </div>
