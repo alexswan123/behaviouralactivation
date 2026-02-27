@@ -16,6 +16,12 @@ if (import.meta.env.VITE_PUBLIC_POSTHOG_KEY) {
     disable_session_recording: true,
     capture_performance: false,
   })
+
+  // Tag owner sessions for filtering in PostHog.
+  // To activate: run localStorage.setItem('is_owner', 'true') once in browser console.
+  if (localStorage.getItem('is_owner')) {
+    posthog.identify('owner-alexandra', { is_owner: true })
+  }
 }
 
 createRoot(document.getElementById('root')!).render(
