@@ -350,7 +350,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                   disabled={!hasPreScores}
                   className="w-full py-3 rounded-xl bg-[#3D5A4C] text-white font-semibold text-sm hover:bg-[#2A3D32] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPreScores ? 'Rate all three scores first' : 'Submit scores'}
+                  {!hasPreScores ? 'Add expected scores first' : 'Submit scores'}
                 </button>
               ) : !activity.completed ? (
                 <button
