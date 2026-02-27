@@ -103,10 +103,9 @@ function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: nu
 
 export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpanded = false }: ActivitySlotProps) {
   const hasPostScores =
-    activity.post_achievement !== null ||
-    activity.post_connection !== null ||
-    activity.post_enjoyment !== null ||
-    activity.post_depression !== null;
+    activity.post_achievement !== null &&
+    activity.post_connection !== null &&
+    activity.post_enjoyment !== null;
 
   const isFullyComplete = activity.completed && hasPostScores;
 
@@ -114,6 +113,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   const [saving, setSaving] = useState(false);
   const [showPostScores, setShowPostScores] = useState(activity.completed);
   const [fullyComplete, setFullyComplete] = useState(isFullyComplete);
+  const [preSubmitted, setPreSubmitted] = useState(activity.completed);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
   const doneButtonRef = useRef<HTMLButtonElement>(null);
   const completeButtonRef = useRef<HTMLButtonElement>(null);
@@ -185,8 +185,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   }, [activity.id, onUpdate]);
 
   const hasPreScores =
-    activity.pre_achievement !== null ||
-    activity.pre_connection !== null ||
+    activity.pre_achievement !== null &&
+    activity.pre_connection !== null &&
     activity.pre_enjoyment !== null;
 
   return (
@@ -260,9 +260,9 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
             </div>
           ) : (
             <>
-              {/* STATE 1 & 2: Before scores or compact summary */}
-              {!activity.completed || !showPostScores ? (
-                /* STATE 1: Pre-activity — show before score inputs */
+              {/* Before scores: editing or compact summary */}
+              {!preSubmitted ? (
+                /* Editing before scores */
                 <div>
                   <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
                     Expected scores (before)
@@ -271,31 +271,38 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                     timing="before"
                     value={activity.pre_depression ?? null}
                     onChange={v => onUpdate(activity.id, { pre_depression: v })}
-                    disabled={activity.completed}
                   />
                   <div className="mt-3">
                     <ACEScoreInput
                       values={preScores}
                       onChange={handlePreChange}
-                      disabled={activity.completed}
                     />
                   </div>
                 </div>
               ) : (
-                /* STATE 2: Post-activity — compact before summary + after score inputs */
-                <div className="space-y-4">
-                  {/* Compact before summary */}
-                  <div>
-                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-2">
+                /* Compact before summary */
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
                       Before scores
                     </p>
-                    <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5 space-y-1.5">
-                      <DepressionCompactSummary pre={activity.pre_depression ?? null} />
-                      <ACECompactSummary pre={preScores} />
-                    </div>
+                    <button
+                      onClick={() => setPreSubmitted(false)}
+                      className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                    >
+                      Edit
+                    </button>
                   </div>
+                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5 space-y-1.5">
+                    <DepressionCompactSummary pre={activity.pre_depression ?? null} />
+                    <ACECompactSummary pre={preScores} />
+                  </div>
+                </div>
+              )}
 
-                  {/* After score inputs */}
+              {/* After score inputs — only after marking done */}
+              {showPostScores && (
+                <div className="space-y-4">
                   <div>
                     <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
                       Actual scores (after)
@@ -337,14 +344,22 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                 >
                   {celebrationMessage}
                 </p>
+              ) : !preSubmitted ? (
+                <button
+                  onClick={() => setPreSubmitted(true)}
+                  disabled={!hasPreScores}
+                  className="w-full py-3 rounded-xl bg-[#3D5A4C] text-white font-semibold text-sm hover:bg-[#2A3D32] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                >
+                  {!hasPreScores ? 'Add expected scores first' : 'Submit scores'}
+                </button>
               ) : !activity.completed ? (
                 <button
                   ref={doneButtonRef}
                   onClick={handleMarkDone}
-                  disabled={!hasPreScores || saving}
+                  disabled={saving}
                   className="w-full py-3 rounded-xl bg-[#7D9B76] text-white font-semibold text-sm hover:bg-[#5C7A55] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPreScores ? 'Add expected scores first' : 'I did it!'}
+                  I did it!
                 </button>
               ) : showPostScores && !fullyComplete ? (
                 <button
@@ -353,7 +368,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                   disabled={!hasPostScores || saving}
                   className="w-full py-3 rounded-xl bg-[#7D9B76] text-white font-semibold text-sm hover:bg-[#5C7A55] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPostScores ? 'Add your after scores first' : 'Complete'}
+                  {!hasPostScores ? 'Rate all three scores first' : 'Complete'}
                 </button>
               ) : null}
             </>
