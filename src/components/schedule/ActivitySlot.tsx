@@ -103,10 +103,9 @@ function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: nu
 
 export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpanded = false }: ActivitySlotProps) {
   const hasPostScores =
-    activity.post_achievement !== null ||
-    activity.post_connection !== null ||
-    activity.post_enjoyment !== null ||
-    activity.post_depression !== null;
+    activity.post_achievement !== null &&
+    activity.post_connection !== null &&
+    activity.post_enjoyment !== null;
 
   const isFullyComplete = activity.completed && hasPostScores;
 
@@ -186,8 +185,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   }, [activity.id, onUpdate]);
 
   const hasPreScores =
-    activity.pre_achievement !== null ||
-    activity.pre_connection !== null ||
+    activity.pre_achievement !== null &&
+    activity.pre_connection !== null &&
     activity.pre_enjoyment !== null;
 
   return (
@@ -351,7 +350,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                   disabled={!hasPreScores}
                   className="w-full py-3 rounded-xl bg-[#3D5A4C] text-white font-semibold text-sm hover:bg-[#2A3D32] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPreScores ? 'Add expected scores first' : 'Submit before scores'}
+                  {!hasPreScores ? 'Rate all three scores first' : 'Submit scores'}
                 </button>
               ) : !activity.completed ? (
                 <button
@@ -369,7 +368,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                   disabled={!hasPostScores || saving}
                   className="w-full py-3 rounded-xl bg-[#7D9B76] text-white font-semibold text-sm hover:bg-[#5C7A55] disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                 >
-                  {!hasPostScores ? 'Add your after scores first' : 'Complete'}
+                  {!hasPostScores ? 'Rate all three scores first' : 'Complete'}
                 </button>
               ) : null}
             </>
