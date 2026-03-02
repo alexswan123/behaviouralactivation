@@ -54,12 +54,27 @@ function showCelebration(
   }, 2000);
 }
 
-function MiniBar({ value, max = 10, colour }: { value: number; max?: number; colour: string }) {
-  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+function DirectionPill({ improved, declined, label }: { improved: boolean; declined: boolean; label: string }) {
+  if (improved) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8F5E8] text-[#3D6B3D] text-[10px] font-semibold">
+        <ArrowUp size={9} />
+        {label}
+      </span>
+    );
+  }
+  if (declined) {
+    return (
+      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FDE8E8] text-[#9B3A45] text-[10px] font-semibold">
+        <ArrowDown size={9} />
+        {label}
+      </span>
+    );
+  }
   return (
-    <div className="w-8 h-1.5 rounded-full bg-[#EDE8E0] overflow-hidden">
-      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colour }} />
-    </div>
+    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0EBE3] text-[#8A8680] text-[10px] font-semibold">
+      {label}
+    </span>
   );
 }
 
@@ -67,40 +82,38 @@ function ACECompactSummary({ pre, post }: {
   pre: { achievement: number | null; connection: number | null; enjoyment: number | null };
   post?: { achievement: number | null; connection: number | null; enjoyment: number | null };
 }) {
-  return (
-    <div className="flex items-center gap-3 flex-wrap">
-      {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
-        const preVal = pre[key];
-        const postVal = post?.[key];
-        const delta = (preVal !== null && postVal !== null && postVal !== undefined) ? postVal - preVal : null;
-        const improved = delta !== null && delta > 0;
-        const declined = delta !== null && delta < 0;
-        return (
-          <div key={key} className="flex items-center gap-1.5">
+  // Before-only: just show the three icons with values
+  if (post === undefined) {
+    return (
+      <div className="flex items-center gap-3 flex-wrap">
+        {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => (
+          <div key={key} className="flex items-center gap-1">
             <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
               <Icon size={11} style={{ color: colour }} />
             </div>
-            <span className="text-xs font-semibold text-[#3D5A4C]">
-              {label}:{' '}
-              {preVal ?? '–'}
-              {post !== undefined && postVal !== null && (
-                <>
-                  {improved && <ArrowUp size={10} className="inline mx-0.5 text-[#5C7A55]" />}
-                  {declined && <ArrowDown size={10} className="inline mx-0.5 text-[#C17C5A]" />}
-                  {!improved && !declined && <span className="inline mx-0.5 text-[#ABA8A3]">&rarr;</span>}
-                  <span style={{ color: improved ? '#5C7A55' : declined ? '#C17C5A' : undefined }}>
-                    {postVal}
-                  </span>
-                  {delta !== null && delta !== 0 && (
-                    <span className="text-[10px] ml-0.5" style={{ color: improved ? '#5C7A55' : '#C17C5A' }}>
-                      ({delta > 0 ? '+' : ''}{delta})
-                    </span>
-                  )}
-                </>
-              )}
-            </span>
-            {post !== undefined && postVal !== null && postVal !== undefined && (
-              <MiniBar value={postVal} colour={colour} />
+            <span className="text-xs font-semibold text-[#3D5A4C]">{pre[key] ?? '–'}</span>
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  // After: show direction pills only — no raw numbers
+  return (
+    <div className="flex items-center gap-2 flex-wrap">
+      {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
+        const preVal = pre[key];
+        const postVal = post[key];
+        const delta = (preVal !== null && postVal !== null) ? postVal - preVal : null;
+        return (
+          <div key={key} className="flex items-center gap-1">
+            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
+              <Icon size={11} style={{ color: colour }} />
+            </div>
+            {delta !== null ? (
+              <DirectionPill improved={delta > 0} declined={delta < 0} label={label} />
+            ) : (
+              <span className="text-xs text-[#ABA8A3]">–</span>
             )}
           </div>
         );
@@ -110,31 +123,43 @@ function ACECompactSummary({ pre, post }: {
 }
 
 function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: number | null }) {
-  const delta = (pre !== null && post !== null && post !== undefined) ? post - pre : null;
-  const improved = delta !== null && delta < 0; // lower depression = better
+  // Before-only
+  if (post === undefined || post === null) {
+    return (
+      <div className="flex items-center gap-1.5">
+        <span className="text-xs font-medium text-[#6A5A9C]">
+          Depression: <span className="font-semibold">{pre ?? '–'}</span>
+        </span>
+      </div>
+    );
+  }
+
+  // After: show direction — lower = better for depression
+  const delta = pre !== null ? post - pre : null;
+  const improved = delta !== null && delta < 0;
   const worsened = delta !== null && delta > 0;
 
   return (
     <div className="flex items-center gap-1.5">
-      <span className="text-xs font-medium text-[#6A5A9C]">
-        Depression:{' '}
-        <span className="font-semibold">{pre ?? '–'}</span>
-        {post !== undefined && post !== null && (
-          <>
-            {improved && <ArrowDown size={10} className="inline mx-0.5 text-[#5C7A55]" />}
-            {worsened && <ArrowUp size={10} className="inline mx-0.5 text-[#C17C5A]" />}
-            {!improved && !worsened && <span className="inline mx-0.5 text-[#ABA8A3]">&rarr;</span>}
-            <span className="font-semibold" style={{ color: improved ? '#5C7A55' : worsened ? '#C17C5A' : undefined }}>
-              {post}
-            </span>
-            {delta !== null && delta !== 0 && (
-              <span className="text-[10px] ml-0.5" style={{ color: improved ? '#5C7A55' : '#C17C5A' }}>
-                ({delta > 0 ? '+' : ''}{delta})
-              </span>
-            )}
-          </>
-        )}
-      </span>
+      {delta !== null ? (
+        improved ? (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8F5E8] text-[#3D6B3D] text-[10px] font-semibold">
+            <ArrowDown size={9} />
+            Depression improved
+          </span>
+        ) : worsened ? (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FDE8E8] text-[#9B3A45] text-[10px] font-semibold">
+            <ArrowUp size={9} />
+            Depression up
+          </span>
+        ) : (
+          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0EBE3] text-[#8A8680] text-[10px] font-semibold">
+            Depression same
+          </span>
+        )
+      ) : (
+        <span className="text-xs font-medium text-[#6A5A9C]">Depression: –</span>
+      )}
     </div>
   );
 }
