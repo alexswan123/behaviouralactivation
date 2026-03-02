@@ -8,19 +8,20 @@ import CategoryFilter from './CategoryFilter';
 import ActivityCard from './ActivityCard';
 import AddActivityModal from '../schedule/AddActivityModal';
 import type { CatalogueActivity, Category } from '../../lib/types';
-import { activities as allActivities, categoryColours, categoryLabels } from '../../data/activities';
+import { activities as allActivities, contextColours, contextLabels } from '../../data/activities';
 import { spell } from '../../lib/spelling';
 import { track } from '../../lib/analytics';
 
+const CONTEXT_ORDER = ['home', 'outdoors', 'social', 'anywhere'] as const;
+
 export default function CataloguePage() {
-  const { search, setSearch, activeCategory, setActiveCategory, groupedFiltered, filtered } = useCatalogue();
+  const { search, setSearch, activeContext, setActiveContext, effortFilter, setEffortFilter, filtered, groupedByContext } = useCatalogue();
   const { addActivity, schedule, activities: scheduledActivities } = useSchedule();
   const { items: pastItems, add: addPast, remove: removePast } = usePastActivities();
   const { favourites, toggle: toggleFav, isFavourite } = useFavourites();
   const [selectedActivity, setSelectedActivity] = useState<CatalogueActivity | null>(null);
   const [pastInput, setPastInput] = useState('');
   const [pastExpanded, setPastExpanded] = useState(true);
-  // When adding from past list, pre-fill the custom name
   const [pastToAdd, setPastToAdd] = useState<string | null>(null);
 
   // Compute "helped you most" — top 3 catalogue activities by avg ACE lift
@@ -68,31 +69,10 @@ export default function CataloguePage() {
     setPastInput('');
   };
 
-  const groupOrder: Record<string, string[]> = {
-    pleasure: ['Creative', 'Nature', 'Entertainment', 'Food & Pampering'],
-    social: ['One-to-one', 'Group & Community'],
-    achievement: ['Home & Admin', 'Learning & Work', 'Physical'],
-    body: ['Sleep & Rest', 'Movement', 'Nourishment', 'Sensory'],
-  };
-
-  const categoryOrder = ['pleasure', 'social', 'achievement', 'body'];
-
-  const orderedGroups: { key: string; category: string; group: string; items: typeof filtered }[] = [];
-  for (const cat of categoryOrder) {
-    if (activeCategory !== 'all' && activeCategory !== cat) continue;
-    for (const grp of groupOrder[cat] ?? []) {
-      const items = groupedFiltered[`${cat}:${grp}`];
-      if (items?.length) orderedGroups.push({ key: `${cat}:${grp}`, category: cat, group: grp, items });
-    }
-  }
-
-  const categorySections: { category: string; groups: typeof orderedGroups }[] = [];
-  if (activeCategory === 'all') {
-    for (const cat of categoryOrder) {
-      const groups = orderedGroups.filter(g => g.category === cat);
-      if (groups.length) categorySections.push({ category: cat, groups });
-    }
-  }
+  // Build context sections for the "all" view
+  const contextSections = CONTEXT_ORDER
+    .filter(ctx => groupedByContext[ctx]?.length)
+    .map(ctx => ({ context: ctx, items: groupedByContext[ctx] }));
 
   return (
     <div>
@@ -104,7 +84,7 @@ export default function CataloguePage() {
         </p>
       </div>
 
-      {/* ── Things I used to enjoy ───────────────────────────────────────── */}
+      {/* Things I used to enjoy */}
       <div className="bg-white border-2 border-[#E8E3DB] rounded-2xl mb-8 overflow-hidden">
         <button
           onClick={() => setPastExpanded(e => !e)}
@@ -112,7 +92,7 @@ export default function CataloguePage() {
         >
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 bg-[#FFF0DC] rounded-lg flex items-center justify-center">
-              <span className="text-[#C17C5A] text-base">✦</span>
+              <span className="text-[#C17C5A] text-base">&#x2726;</span>
             </div>
             <div className="text-left">
               <p className="font-semibold text-[#2A3D32] text-sm">Things I enjoy</p>
@@ -137,7 +117,7 @@ export default function CataloguePage() {
             <div className="flex gap-2 mb-4">
               <input
                 type="text"
-                placeholder="e.g. evening walks, cooking, calling a friend…"
+                placeholder="e.g. evening walks, cooking, calling a friend..."
                 value={pastInput}
                 onChange={e => setPastInput(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && handleAddPast()}
@@ -184,7 +164,7 @@ export default function CataloguePage() {
         )}
       </div>
 
-      {/* ── My favourites ────────────────────────────────────────────────── */}
+      {/* My favourites */}
       {favouriteActivities.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -206,7 +186,7 @@ export default function CataloguePage() {
         </div>
       )}
 
-      {/* ── Helped you most ──────────────────────────────────────────────── */}
+      {/* Helped you most */}
       {helpedMost.length > 0 && (
         <div className="mb-8">
           <div className="flex items-center gap-2 mb-4">
@@ -217,7 +197,7 @@ export default function CataloguePage() {
             {helpedMost.map(({ activity, avg }) => (
               <div key={activity.id} className="flex flex-col gap-1.5">
                 <span className="self-start px-2 py-0.5 rounded-md bg-[#F0F7EE] border border-[#C8DCC4] text-[10px] font-semibold text-[#5C7A55]">
-                  ⬆ +{avg.toFixed(1)} avg lift
+                  +{avg.toFixed(1)} avg lift
                 </span>
                 <ActivityCard
                   activity={activity}
@@ -232,8 +212,8 @@ export default function CataloguePage() {
       )}
 
       {/* Search + filter row */}
-      <div className="flex flex-col sm:flex-row gap-3 mb-8">
-        <div className="relative flex-1">
+      <div className="flex flex-col gap-3 mb-8">
+        <div className="relative">
           <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#ABA8A3]" />
           <input
             type="text"
@@ -244,39 +224,34 @@ export default function CataloguePage() {
           />
         </div>
         <CategoryFilter
-          active={activeCategory}
-          onChange={(cat) => {
-            setActiveCategory(cat);
-            if (cat !== 'all') track.catalogueCategoryFiltered(cat);
+          activeContext={activeContext}
+          onContextChange={(ctx) => {
+            setActiveContext(ctx);
+            if (ctx !== 'all') track.catalogueCategoryFiltered(ctx);
           }}
+          effortFilter={effortFilter}
+          onEffortChange={setEffortFilter}
         />
       </div>
 
       {/* Content */}
-      {orderedGroups.length === 0 ? (
+      {filtered.length === 0 ? (
         <p className="text-center text-[#ABA8A3] py-16 text-base">No activities match your search</p>
-      ) : activeCategory === 'all' ? (
+      ) : activeContext === 'all' ? (
         <div className="space-y-12">
-          {categorySections.map(({ category, groups }) => {
-            const colours = categoryColours[category];
+          {contextSections.map(({ context, items }) => {
+            const colours = contextColours[context];
             return (
-              <div key={category}>
+              <div key={context}>
                 <div
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-xl mb-6"
                   style={{ background: colours.bg, color: colours.text, border: `1.5px solid ${colours.border}` }}
                 >
-                  <span className="font-bold text-sm tracking-wide">{categoryLabels[category]}</span>
+                  <span className="font-bold text-sm tracking-wide">{contextLabels[context]}</span>
                 </div>
-                <div className="space-y-8">
-                  {groups.map(({ key, group, items }) => (
-                    <div key={key}>
-                      <h3 className="text-sm font-semibold text-[#8A8680] uppercase tracking-widest mb-4">{group}</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {items.map(activity => (
-                          <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
-                        ))}
-                      </div>
-                    </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {items.map(activity => (
+                    <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
                   ))}
                 </div>
               </div>
@@ -284,16 +259,9 @@ export default function CataloguePage() {
           })}
         </div>
       ) : (
-        <div className="space-y-10">
-          {orderedGroups.map(({ key, group, items }) => (
-            <div key={key}>
-              <h3 className="text-sm font-semibold text-[#8A8680] uppercase tracking-widest mb-4">{group}</h3>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                {items.map(activity => (
-                  <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
-                ))}
-              </div>
-            </div>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {filtered.map(activity => (
+            <ActivityCard key={activity.id} activity={activity} onAdd={setSelectedActivity} isFavourite={isFavourite(activity.id)} onToggleFavourite={toggleFav} />
           ))}
         </div>
       )}

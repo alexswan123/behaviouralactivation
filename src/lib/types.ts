@@ -1,4 +1,6 @@
 export type Category = 'pleasure' | 'social' | 'achievement' | 'body';
+export type Context = 'home' | 'outdoors' | 'social' | 'anywhere';
+export type Effort = 'low' | 'medium' | 'high';
 
 export interface CatalogueActivity {
   id: string;
@@ -6,6 +8,9 @@ export interface CatalogueActivity {
   description: string;
   category: Category;
   group: string;
+  context: Context;
+  effort: Effort;
+  durationMinutes?: number;
 }
 
 export interface ACEScores {

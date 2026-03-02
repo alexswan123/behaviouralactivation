@@ -1,4 +1,4 @@
-import { ArrowDown, TrendingUp, Sparkles } from 'lucide-react';
+import { ArrowDown, TrendingUp, Sparkles, Compass } from 'lucide-react';
 import { spell } from '../../lib/spelling';
 
 export default function HowItWorksSection() {
@@ -122,6 +122,29 @@ export default function HowItWorksSection() {
             <span className="font-medium text-[#3D5A4C]">Before each activity,</span> you'll predict your ACE scores.
             <span className="font-medium text-[#3D5A4C]"> Afterwards,</span> you'll rate how it actually felt.
             Comparing the two is one of the most powerful parts of the {spell.programme.toLowerCase()}.
+          </p>
+        </div>
+      </section>
+
+      {/* Use it your way */}
+      <section className="bg-white rounded-2xl border border-[#E8E4DE] p-7 shadow-sm">
+        <div className="flex items-center gap-3 mb-5">
+          <div className="w-8 h-8 bg-[#EDE8FF] rounded-lg flex items-center justify-center">
+            <Compass size={18} className="text-[#6A5A9C]" />
+          </div>
+          <h2 className="text-lg font-semibold text-[#3D5A4C]">Use it your way</h2>
+        </div>
+        <p className="text-[#5C5A57] mb-4">
+          People use Bloom differently, and that's fine. Some plan their week ahead.
+          Others fill it in on the day. Some skip days. All of that works.
+        </p>
+        <p className="text-[#5C5A57] mb-4">
+          There's no wrong way to do this. The only thing that matters is doing
+          <em> something</em>, even small, even imperfect.
+        </p>
+        <div className="bg-[#FAF6F0] rounded-xl p-4 border border-[#E8E4DE]">
+          <p className="text-sm text-[#5C5A57]">
+            If you have questions about how Bloom fits into your care, speak with your clinician.
           </p>
         </div>
       </section>

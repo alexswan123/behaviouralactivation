@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { X, Search, Clock, Sparkles } from 'lucide-react';
-import { activities, categoryColours, categoryLabels } from '../../data/activities';
+import { activities, contextColours, contextLabels } from '../../data/activities';
 import { usePastActivities } from '../../hooks/usePastActivities';
-import type { CatalogueActivity, Category } from '../../lib/types';
+import type { CatalogueActivity, Category, Context } from '../../lib/types';
 import { track } from '../../lib/analytics';
 
 interface AddActivityModalProps {
@@ -19,12 +19,12 @@ interface AddActivityModalProps {
   maxDay: number;
 }
 
-const CATEGORY_FILTERS: { value: 'all' | Category; label: string }[] = [
+const CONTEXT_FILTERS: { value: 'all' | Context; label: string }[] = [
   { value: 'all', label: 'All' },
-  { value: 'pleasure', label: 'Pleasure' },
-  { value: 'social', label: 'Social' },
-  { value: 'achievement', label: 'Achievement' },
-  { value: 'body', label: 'Body' },
+  { value: 'home', label: 'At Home' },
+  { value: 'outdoors', label: 'Outside' },
+  { value: 'social', label: 'With Others' },
+  { value: 'anywhere', label: 'Anywhere' },
 ];
 
 const TIME_SLOTS = [
@@ -40,17 +40,17 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
   const [selected, setSelected] = useState<CatalogueActivity | null>(null);
   const [customName, setCustomName] = useState(initialCustomName ?? '');
   const [search, setSearch] = useState('');
-  const [categoryFilter, setCategoryFilter] = useState<'all' | Category>('all');
+  const [contextFilter, setContextFilter] = useState<'all' | Context>('all');
   const [dayNumber, setDayNumber] = useState(targetDay ?? 1);
   const [time, setTime] = useState('09:00');
   const [saving, setSaving] = useState(false);
 
   const filtered = activities.filter(a => {
-    const matchCat = categoryFilter === 'all' || a.category === categoryFilter;
+    const matchCtx = contextFilter === 'all' || a.context === contextFilter;
     const matchSearch = search === '' ||
       a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.description.toLowerCase().includes(search.toLowerCase());
-    return matchCat && matchSearch;
+    return matchCtx && matchSearch;
   });
 
   // Past activities filtered by search (if any search term)
@@ -125,12 +125,12 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                 />
               </div>
               <div className="flex gap-1.5 flex-wrap">
-                {CATEGORY_FILTERS.map(f => (
+                {CONTEXT_FILTERS.map(f => (
                   <button
                     key={f.value}
-                    onClick={() => setCategoryFilter(f.value)}
+                    onClick={() => setContextFilter(f.value)}
                     className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                      categoryFilter === f.value
+                      contextFilter === f.value
                         ? 'bg-[#3D5A4C] text-white shadow-sm'
                         : 'bg-[#EDE8E0] text-[#5C5A57] hover:bg-[#E0D8CE]'
                     }`}
@@ -175,7 +175,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                         className="w-full text-left flex items-center justify-between gap-3 px-4 py-3 rounded-xl bg-[#FFF5EE] border-2 border-[#F0D8C4] hover:border-[#C17C5A] hover:bg-[#FFF0DC] transition-all duration-150"
                       >
                         <p className="text-sm font-semibold text-[#7B4A10]">{item.text}</p>
-                        <span className="text-xs text-[#C17C5A] font-semibold shrink-0">Add →</span>
+                        <span className="text-xs text-[#C17C5A] font-semibold shrink-0">Add &rarr;</span>
                       </button>
                     ))}
                   </div>
@@ -188,7 +188,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
               ) : (
                 <div className="space-y-2">
                   {filtered.map(activity => {
-                    const colours = categoryColours[activity.category];
+                    const colours = contextColours[activity.context];
                     return (
                       <button
                         key={activity.id}
@@ -198,12 +198,17 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-[#2A3D32]">{activity.name}</p>
                           <p className="text-xs text-[#8A8680] mt-0.5 leading-relaxed">{activity.description}</p>
+                          {activity.effort === 'low' && (
+                            <span className="inline-block mt-1 text-[10px] font-semibold text-[#7D9B76] bg-[#F0F7EE] px-1.5 py-0.5 rounded">
+                              Low effort
+                            </span>
+                          )}
                         </div>
                         <span
                           className="px-2.5 py-1 rounded-lg text-xs font-semibold shrink-0"
                           style={{ background: colours.bg, color: colours.text, border: `1px solid ${colours.border}` }}
                         >
-                          {categoryLabels[activity.category]}
+                          {contextLabels[activity.context]}
                         </span>
                       </button>
                     );

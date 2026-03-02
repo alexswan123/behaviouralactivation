@@ -10,7 +10,7 @@ import ExportModal from './ExportModal';
 import { addDays, format } from '../../lib/dateUtils';
 import { track } from '../../lib/analytics';
 import { activities as catalogueActivities } from '../../data/activities';
-import type { Category } from '../../lib/types';
+import type { Context } from '../../lib/types';
 
 const DURATION_OPTIONS = [10, 14, 21, 30];
 type DialogMode = 'changeDate' | 'reset' | 'changeDuration' | 'quickFill' | null;
@@ -133,33 +133,40 @@ export default function SchedulePage() {
     const daysWithActivities = new Set(activities.map(a => a.day_number));
     const emptyDays = Array.from({ length: duration }, (_, i) => i + 1).filter(d => !daysWithActivities.has(d));
 
-    const categoryOrder: Category[] = ['achievement', 'social', 'body', 'pleasure'];
-    const timeByCategory: Record<Category, string> = {
-      achievement: '09:00',
-      body: '09:00',
+    const contextOrder: Context[] = ['home', 'outdoors', 'social', 'anywhere'];
+    const timeByContext: Record<Context, string> = {
+      home: '09:00',
+      outdoors: '10:00',
       social: '15:00',
-      pleasure: '19:00',
+      anywhere: '19:00',
     };
 
     const favouriteCats = catalogueActivities.filter(a => isFavourite(a.id));
 
     for (let i = 0; i < emptyDays.length; i++) {
       const dayNumber = emptyDays[i];
-      const cat = categoryOrder[i % categoryOrder.length];
+      const ctx = contextOrder[i % contextOrder.length];
+
+      // Prefer low-effort activities for early programme days (first half)
+      const preferLow = dayNumber <= Math.ceil(duration / 2);
 
       // Try favourite first
-      let pick = favouriteCats.find(a => a.category === cat);
-      // Fall back to any from catalogue
+      let pick = favouriteCats.find(a => a.context === ctx && (!preferLow || a.effort === 'low'));
+      if (!pick) pick = favouriteCats.find(a => a.context === ctx);
+
+      // Fall back to catalogue
       if (!pick) {
-        const pool = catalogueActivities.filter(a => a.category === cat);
-        pick = pool[Math.floor(Math.random() * pool.length)];
+        const pool = catalogueActivities.filter(a => a.context === ctx);
+        const lowPool = pool.filter(a => a.effort === 'low');
+        const candidates = preferLow && lowPool.length > 0 ? lowPool : pool;
+        pick = candidates[Math.floor(Math.random() * candidates.length)];
       }
       if (!pick) continue;
 
       await addActivity({
         dayNumber,
         activity_name: pick.name,
-        scheduled_time: timeByCategory[cat],
+        scheduled_time: timeByContext[ctx],
         catalogue_id: pick.id,
         category: pick.category,
       });

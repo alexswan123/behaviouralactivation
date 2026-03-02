@@ -1,19 +1,20 @@
 import { useState, useCallback, useRef } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart, ArrowUp, ArrowDown } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import ACEScoreInput from './ACEScoreInput';
 import DepressionSlider from './DepressionSlider';
-import { categoryColours, categoryLabels } from '../../data/activities';
+import { categoryColours, categoryLabels, contextColours, contextLabels } from '../../data/activities';
+import { activities as catalogueActivities } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
 import { track } from '../../lib/analytics';
 
 const encouragingMessages = [
-  'You followed through — that matters.',
-  'You showed up for yourself today.',
-  'Done. That\u2019s one more data point about what works for you.',
-  'You did what you planned. That\u2019s the work.',
-  'Completed. Every activity is information.',
-  'You took action — even when it\u2019s hard, that counts.',
+  'Done.',
+  'Nice one.',
+  'One more in the books.',
+  'Tick.',
+  'That counts.',
+  'Good stuff.',
 ];
 
 interface ActivitySlotProps {
@@ -53,6 +54,15 @@ function showCelebration(
   }, 2000);
 }
 
+function MiniBar({ value, max = 10, colour }: { value: number; max?: number; colour: string }) {
+  const pct = Math.min(100, Math.max(0, (value / max) * 100));
+  return (
+    <div className="w-8 h-1.5 rounded-full bg-[#EDE8E0] overflow-hidden">
+      <div className="h-full rounded-full transition-all" style={{ width: `${pct}%`, background: colour }} />
+    </div>
+  );
+}
+
 function ACECompactSummary({ pre, post }: {
   pre: { achievement: number | null; connection: number | null; enjoyment: number | null };
   post?: { achievement: number | null; connection: number | null; enjoyment: number | null };
@@ -62,6 +72,9 @@ function ACECompactSummary({ pre, post }: {
       {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
         const preVal = pre[key];
         const postVal = post?.[key];
+        const delta = (preVal !== null && postVal !== null) ? postVal - preVal : null;
+        const improved = delta !== null && delta > 0;
+        const declined = delta !== null && delta < 0;
         return (
           <div key={key} className="flex items-center gap-1.5">
             <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
@@ -70,13 +83,25 @@ function ACECompactSummary({ pre, post }: {
             <span className="text-xs font-semibold text-[#3D5A4C]">
               {label}:{' '}
               {preVal ?? '–'}
-              {post !== undefined && (
+              {post !== undefined && postVal !== null && (
                 <>
-                  <ArrowRight size={10} className="inline mx-0.5 text-[#ABA8A3]" />
-                  {postVal ?? '–'}
+                  {improved && <ArrowUp size={10} className="inline mx-0.5 text-[#5C7A55]" />}
+                  {declined && <ArrowDown size={10} className="inline mx-0.5 text-[#C17C5A]" />}
+                  {!improved && !declined && <span className="inline mx-0.5 text-[#ABA8A3]">&rarr;</span>}
+                  <span style={{ color: improved ? '#5C7A55' : declined ? '#C17C5A' : undefined }}>
+                    {postVal}
+                  </span>
+                  {delta !== null && delta !== 0 && (
+                    <span className="text-[10px] ml-0.5" style={{ color: improved ? '#5C7A55' : '#C17C5A' }}>
+                      ({delta > 0 ? '+' : ''}{delta})
+                    </span>
+                  )}
                 </>
               )}
             </span>
+            {post !== undefined && postVal !== null && (
+              <MiniBar value={postVal} colour={colour} />
+            )}
           </div>
         );
       })}
@@ -85,15 +110,28 @@ function ACECompactSummary({ pre, post }: {
 }
 
 function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: number | null }) {
+  const delta = (pre !== null && post !== null && post !== undefined) ? post - pre : null;
+  const improved = delta !== null && delta < 0; // lower depression = better
+  const worsened = delta !== null && delta > 0;
+
   return (
     <div className="flex items-center gap-1.5">
       <span className="text-xs font-medium text-[#6A5A9C]">
         Depression:{' '}
         <span className="font-semibold">{pre ?? '–'}</span>
-        {post !== undefined && (
+        {post !== undefined && post !== null && (
           <>
-            <ArrowRight size={10} className="inline mx-0.5 text-[#ABA8A3]" />
-            <span className="font-semibold">{post ?? '–'}</span>
+            {improved && <ArrowDown size={10} className="inline mx-0.5 text-[#5C7A55]" />}
+            {worsened && <ArrowUp size={10} className="inline mx-0.5 text-[#C17C5A]" />}
+            {!improved && !worsened && <span className="inline mx-0.5 text-[#ABA8A3]">&rarr;</span>}
+            <span className="font-semibold" style={{ color: improved ? '#5C7A55' : worsened ? '#C17C5A' : undefined }}>
+              {post}
+            </span>
+            {delta !== null && delta !== 0 && (
+              <span className="text-[10px] ml-0.5" style={{ color: improved ? '#5C7A55' : '#C17C5A' }}>
+                ({delta > 0 ? '+' : ''}{delta})
+              </span>
+            )}
           </>
         )}
       </span>
@@ -118,7 +156,20 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   const doneButtonRef = useRef<HTMLButtonElement>(null);
   const completeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const colours = activity.category ? categoryColours[activity.category] : null;
+  // Look up catalogue activity to get context for badge colours
+  const catalogueEntry = activity.catalogue_id
+    ? catalogueActivities.find(c => c.id === activity.catalogue_id)
+    : null;
+  const colours = catalogueEntry
+    ? contextColours[catalogueEntry.context]
+    : activity.category
+      ? categoryColours[activity.category]
+      : null;
+  const badgeLabel = catalogueEntry
+    ? contextLabels[catalogueEntry.context]
+    : activity.category
+      ? categoryLabels[activity.category!]
+      : null;
 
   const preScores = {
     achievement: activity.pre_achievement,
@@ -210,12 +261,12 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
               <Clock size={11} />
               {activity.scheduled_time}
             </span>
-            {colours && (
+            {colours && badgeLabel && (
               <span
                 className="px-2 py-0.5 rounded-md text-xs font-semibold"
                 style={{ background: colours.bg, color: colours.text, border: `1px solid ${colours.border}` }}
               >
-                {categoryLabels[activity.category!]}
+                {badgeLabel}
               </span>
             )}
           </div>
