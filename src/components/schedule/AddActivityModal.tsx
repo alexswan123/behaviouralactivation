@@ -58,7 +58,11 @@ export default function AddActivityModal({ targetDay, targetDate, initialCustomN
       return h * 60 + m >= currentMinutes;
     });
   }, [isTodayDate]);
-  const [time, setTime] = useState(availableSlots[0] ?? '09:00');
+  // Default to next available slot for today, or 09:00 for future days
+  const [time, setTime] = useState(() => {
+    if (isTodayDate) return availableSlots[0] ?? '09:00';
+    return '09:00';
+  });
 
   // Lock body scroll while modal is open
   useEffect(() => {
