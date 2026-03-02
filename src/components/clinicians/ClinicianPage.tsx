@@ -144,7 +144,7 @@ export default function ClinicianPage() {
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
               <Users size={16} className="text-[#7D9B76]" />
-              <p className="text-xs font-semibold text-[#7D9B76] uppercase tracking-wide">Support Bloom</p>
+              <p className="text-xs font-semibold text-[#7D9B76] uppercase tracking-wide">Donate</p>
             </div>
             <h3 className="text-lg font-bold text-[#2A3D32] mb-2">Free for clients, always</h3>
             <p className="text-sm text-[#6B6866] leading-relaxed">

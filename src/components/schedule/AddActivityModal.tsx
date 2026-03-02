@@ -1,12 +1,14 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { X, Search, Clock, Sparkles } from 'lucide-react';
 import { activities, contextColours, contextLabels } from '../../data/activities';
 import { usePastActivities } from '../../hooks/usePastActivities';
+import { isToday } from '../../lib/dateUtils';
 import type { CatalogueActivity, Category, Context } from '../../lib/types';
 import { track } from '../../lib/analytics';
 
 interface AddActivityModalProps {
   targetDay?: number;
+  targetDate?: string;
   initialCustomName?: string;
   onAdd: (data: {
     dayNumber: number;
@@ -34,7 +36,7 @@ const TIME_SLOTS = [
   '19:00', '19:30', '20:00', '20:30', '21:00',
 ];
 
-export default function AddActivityModal({ targetDay, initialCustomName, onAdd, onClose, maxDay }: AddActivityModalProps) {
+export default function AddActivityModal({ targetDay, targetDate, initialCustomName, onAdd, onClose, maxDay }: AddActivityModalProps) {
   const { items: pastItems } = usePastActivities();
   const [step, setStep] = useState<'browse' | 'details'>(initialCustomName ? 'details' : 'browse');
   const [selected, setSelected] = useState<CatalogueActivity | null>(null);
@@ -43,8 +45,20 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
   const [contextFilter, setContextFilter] = useState<'all' | Context>('all');
   const [effortFilter, setEffortFilter] = useState<'all' | 'low' | 'quick'>('all');
   const [dayNumber, setDayNumber] = useState(targetDay ?? 1);
-  const [time, setTime] = useState('09:00');
   const [saving, setSaving] = useState(false);
+
+  // Filter past time slots when scheduling for today
+  const isTodayDate = targetDate ? isToday(targetDate) : false;
+  const availableSlots = useMemo(() => {
+    if (!isTodayDate) return TIME_SLOTS;
+    const now = new Date();
+    const currentMinutes = now.getHours() * 60 + now.getMinutes();
+    return TIME_SLOTS.filter(slot => {
+      const [h, m] = slot.split(':').map(Number);
+      return h * 60 + m >= currentMinutes;
+    });
+  }, [isTodayDate]);
+  const [time, setTime] = useState(availableSlots[0] ?? '09:00');
 
   // Lock body scroll while modal is open
   useEffect(() => {
@@ -290,15 +304,21 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                 <Clock size={14} />
                 Time
               </label>
-              <select
-                value={time}
-                onChange={e => setTime(e.target.value)}
-                className="w-full border border-[#E8E4DE] rounded-xl px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76]"
-              >
-                {TIME_SLOTS.map(t => (
-                  <option key={t} value={t}>{t}</option>
-                ))}
-              </select>
+              {availableSlots.length === 0 ? (
+                <p className="text-sm text-[#9E9B97] py-3">
+                  No more time slots for today — try tomorrow
+                </p>
+              ) : (
+                <select
+                  value={time}
+                  onChange={e => setTime(e.target.value)}
+                  className="w-full border border-[#E8E4DE] rounded-xl px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76]"
+                >
+                  {availableSlots.map(t => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              )}
             </div>
 
             {/* Actions */}
@@ -311,7 +331,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
               </button>
               <button
                 onClick={handleSave}
-                disabled={saving}
+                disabled={saving || availableSlots.length === 0}
                 className="flex-1 py-3 rounded-xl bg-[#7D9B76] text-white text-sm font-semibold hover:bg-[#5C7A55] disabled:opacity-60 transition-colors"
               >
                 {saving ? 'Saving...' : 'Add to schedule'}

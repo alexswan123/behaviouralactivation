@@ -75,43 +75,64 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
   });
   const aceUp = dims.filter(d => d > 0).length;
   const aceDown = dims.filter(d => d < 0).length;
+  const aceNetUp = aceUp > aceDown;
+  const aceNetDown = aceDown > aceUp;
 
-  // Depression
+  // Depression: negative delta = improved (lower score = better mood)
   const depPre = activity.pre_depression;
   const depPost = activity.post_depression;
   const depDelta = (depPre !== null && depPost !== null) ? depPost - depPre : null;
+  const hasDep = depDelta !== null;
+  const depImproved = hasDep && depDelta < 0;
+  const depWorsened = hasDep && depDelta > 0;
 
-  // Build a sentence
-  const parts: string[] = [];
+  let sentence: string;
+  let overall: 'positive' | 'tough' | 'neutral';
 
-  if (aceUp > 0 && aceDown === 0) {
-    parts.push('You felt better than expected');
-  } else if (aceUp === 0 && aceDown > 0) {
-    parts.push('It was harder than expected');
-  } else if (aceUp > 0 && aceDown > 0) {
-    parts.push('Mixed results');
-  } else {
-    parts.push('About what you expected');
-  }
-
-  if (depDelta !== null) {
-    if (depDelta < -10) {
-      parts.push('mood lifted noticeably');
-    } else if (depDelta < 0) {
-      parts.push('mood lifted a bit');
-    } else if (depDelta > 10) {
-      parts.push('mood dipped');
-    } else if (depDelta > 0) {
-      parts.push('mood dipped slightly');
+  if (!hasDep) {
+    // ACE-only messages
+    if (aceNetUp) {
+      sentence = 'You got more out of this than you expected.';
+      overall = 'positive';
+    } else if (aceNetDown) {
+      sentence = "This was harder than expected. That happens — showing up still counts.";
+      overall = 'tough';
+    } else {
+      sentence = 'About what you expected.';
+      overall = 'neutral';
     }
+  } else if (aceNetUp && depImproved) {
+    sentence = 'You rated this higher than you expected, and your mood improved too.';
+    overall = 'positive';
+  } else if (aceNetUp && depWorsened) {
+    sentence = "You got more out of this than you expected. Even though your mood didn\u2019t shift, that\u2019s common \u2014 depression can make it hard to see the progress you\u2019re making.";
+    overall = 'neutral';
+  } else if (aceNetDown && depImproved) {
+    sentence = "This was harder than expected, but your mood still improved. That\u2019s worth noticing.";
+    overall = 'positive';
+  } else if (aceNetDown && depWorsened) {
+    sentence = "This was a tough one. That happens, and it doesn\u2019t undo the effort. Showing up still counts.";
+    overall = 'tough';
+  } else if (aceNetUp) {
+    // ACE up, depression unchanged
+    sentence = 'You got more out of this than you expected.';
+    overall = 'positive';
+  } else if (aceNetDown) {
+    // ACE down, depression unchanged
+    sentence = "This was harder than expected. That\u2019s okay — not every activity will land the same way.";
+    overall = 'tough';
+  } else if (depImproved) {
+    // ACE neutral, depression improved
+    sentence = 'About what you expected, and your mood improved. Small wins add up.';
+    overall = 'positive';
+  } else if (depWorsened) {
+    // ACE neutral, depression worsened
+    sentence = "Your mood dipped, but you still showed up. That takes effort, and it counts.";
+    overall = 'tough';
+  } else {
+    sentence = 'About what you expected.';
+    overall = 'neutral';
   }
-
-  const sentence = parts.join(', ');
-  const overall = (aceUp > aceDown && (depDelta === null || depDelta <= 0))
-    ? 'positive'
-    : (aceDown > aceUp || (depDelta !== null && depDelta > 10))
-      ? 'tough'
-      : 'neutral';
 
   return (
     <p className={`text-sm ${
@@ -119,7 +140,7 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
       overall === 'tough' ? 'text-[#8A8680]' :
       'text-[#5C5A57]'
     }`}>
-      {sentence}.
+      {sentence}
     </p>
   );
 }
