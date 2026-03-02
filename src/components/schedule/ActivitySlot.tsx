@@ -141,7 +141,7 @@ function ScoresSummary({ activity, timing }: { activity: ScheduledActivity; timi
       })}
       {(activity[`${prefix}_depression` as keyof ScheduledActivity] as number | null) !== null && (
         <span className="text-xs font-medium text-[#6A5A9C]">
-          Dep: {activity[`${prefix}_depression` as keyof ScheduledActivity] as number}
+          Depression: {activity[`${prefix}_depression` as keyof ScheduledActivity] as number}
         </span>
       )}
     </div>
