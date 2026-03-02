@@ -1,5 +1,5 @@
 import { useState, useCallback, useRef } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart, ArrowUp, ArrowDown } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import ACEScoreInput from './ACEScoreInput';
 import DepressionSlider from './DepressionSlider';
@@ -54,111 +54,93 @@ function showCelebration(
   }, 2000);
 }
 
-function DirectionPill({ improved, declined, label }: { improved: boolean; declined: boolean; label: string }) {
-  if (improved) {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8F5E8] text-[#3D6B3D] text-[10px] font-semibold">
-        <ArrowUp size={9} />
-        {label}
-      </span>
-    );
+function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
+  const pre = {
+    achievement: activity.pre_achievement,
+    connection: activity.pre_connection,
+    enjoyment: activity.pre_enjoyment,
+  };
+  const post = {
+    achievement: activity.post_achievement,
+    connection: activity.post_connection,
+    enjoyment: activity.post_enjoyment,
+  };
+
+  // ACE: count how many improved, same, declined
+  const dims = (['achievement', 'connection', 'enjoyment'] as const).map(key => {
+    const preVal = pre[key];
+    const postVal = post[key];
+    if (preVal === null || postVal === null) return 0;
+    return postVal - preVal;
+  });
+  const aceUp = dims.filter(d => d > 0).length;
+  const aceDown = dims.filter(d => d < 0).length;
+
+  // Depression
+  const depPre = activity.pre_depression;
+  const depPost = activity.post_depression;
+  const depDelta = (depPre !== null && depPost !== null) ? depPost - depPre : null;
+
+  // Build a sentence
+  const parts: string[] = [];
+
+  if (aceUp > 0 && aceDown === 0) {
+    parts.push('You felt better than expected');
+  } else if (aceUp === 0 && aceDown > 0) {
+    parts.push('It was harder than expected');
+  } else if (aceUp > 0 && aceDown > 0) {
+    parts.push('Mixed results');
+  } else {
+    parts.push('About what you expected');
   }
-  if (declined) {
-    return (
-      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FDE8E8] text-[#9B3A45] text-[10px] font-semibold">
-        <ArrowDown size={9} />
-        {label}
-      </span>
-    );
+
+  if (depDelta !== null) {
+    if (depDelta < -10) {
+      parts.push('mood lifted noticeably');
+    } else if (depDelta < 0) {
+      parts.push('mood lifted a bit');
+    } else if (depDelta > 10) {
+      parts.push('mood dipped');
+    } else if (depDelta > 0) {
+      parts.push('mood dipped slightly');
+    }
   }
+
+  const sentence = parts.join(', ');
+  const overall = (aceUp > aceDown && (depDelta === null || depDelta <= 0))
+    ? 'positive'
+    : (aceDown > aceUp || (depDelta !== null && depDelta > 10))
+      ? 'tough'
+      : 'neutral';
+
   return (
-    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0EBE3] text-[#8A8680] text-[10px] font-semibold">
-      {label}
-    </span>
+    <p className={`text-sm ${
+      overall === 'positive' ? 'text-[#3D5A4C]' :
+      overall === 'tough' ? 'text-[#8A8680]' :
+      'text-[#5C5A57]'
+    }`}>
+      {sentence}.
+    </p>
   );
 }
 
-function ACECompactSummary({ pre, post }: {
-  pre: { achievement: number | null; connection: number | null; enjoyment: number | null };
-  post?: { achievement: number | null; connection: number | null; enjoyment: number | null };
-}) {
-  // Before-only: just show the three icons with values
-  if (post === undefined) {
-    return (
-      <div className="flex items-center gap-3 flex-wrap">
-        {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => (
-          <div key={key} className="flex items-center gap-1">
-            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
-              <Icon size={11} style={{ color: colour }} />
-            </div>
-            <span className="text-xs font-semibold text-[#3D5A4C]">{pre[key] ?? '–'}</span>
-          </div>
-        ))}
-      </div>
-    );
-  }
-
-  // After: show direction pills only — no raw numbers
+function BeforeScoresSummary({ activity }: { activity: ScheduledActivity }) {
   return (
-    <div className="flex items-center gap-2 flex-wrap">
-      {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
-        const preVal = pre[key];
-        const postVal = post[key];
-        const delta = (preVal !== null && postVal !== null) ? postVal - preVal : null;
-        return (
-          <div key={key} className="flex items-center gap-1">
-            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
-              <Icon size={11} style={{ color: colour }} />
-            </div>
-            {delta !== null ? (
-              <DirectionPill improved={delta > 0} declined={delta < 0} label={label} />
-            ) : (
-              <span className="text-xs text-[#ABA8A3]">–</span>
-            )}
+    <div className="flex items-center gap-3 flex-wrap">
+      {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => (
+        <div key={key} className="flex items-center gap-1">
+          <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
+            <Icon size={11} style={{ color: colour }} />
           </div>
-        );
-      })}
-    </div>
-  );
-}
-
-function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: number | null }) {
-  // Before-only
-  if (post === undefined || post === null) {
-    return (
-      <div className="flex items-center gap-1.5">
+          <span className="text-xs font-semibold text-[#3D5A4C]">
+            {activity[`pre_${key}` as keyof ScheduledActivity] as number | null ?? '–'}
+          </span>
+        </div>
+      ))}
+      {activity.pre_depression !== null && (
         <span className="text-xs font-medium text-[#6A5A9C]">
-          Depression: <span className="font-semibold">{pre ?? '–'}</span>
+          Dep: {activity.pre_depression}
         </span>
-      </div>
-    );
-  }
-
-  // After: show direction — lower = better for depression
-  const delta = pre !== null ? post - pre : null;
-  const improved = delta !== null && delta < 0;
-  const worsened = delta !== null && delta > 0;
-
-  return (
-    <div className="flex items-center gap-1.5">
-      {delta !== null ? (
-        improved ? (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#E8F5E8] text-[#3D6B3D] text-[10px] font-semibold">
-            <ArrowDown size={9} />
-            Depression improved
-          </span>
-        ) : worsened ? (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#FDE8E8] text-[#9B3A45] text-[10px] font-semibold">
-            <ArrowUp size={9} />
-            Depression up
-          </span>
-        ) : (
-          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-[#F0EBE3] text-[#8A8680] text-[10px] font-semibold">
-            Depression same
-          </span>
-        )
-      ) : (
-        <span className="text-xs font-medium text-[#6A5A9C]">Depression: –</span>
       )}
     </div>
   );
@@ -314,12 +296,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
               <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
                 Results
               </p>
-              <div className="rounded-lg bg-white border border-[#E8E4DE] p-3 space-y-2">
-                <DepressionCompactSummary
-                  pre={activity.pre_depression ?? null}
-                  post={activity.post_depression ?? null}
-                />
-                <ACECompactSummary pre={preScores} post={postScores} />
+              <div className="rounded-lg bg-white border border-[#E8E4DE] p-3">
+                <ResultsSummary activity={activity} />
               </div>
               {activity.notes && (
                 <div>
@@ -369,9 +347,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                       Edit
                     </button>
                   </div>
-                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5 space-y-1.5">
-                    <DepressionCompactSummary pre={activity.pre_depression ?? null} />
-                    <ACECompactSummary pre={preScores} />
+                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                    <BeforeScoresSummary activity={activity} />
                   </div>
                 </div>
               )}
