@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, Search, Clock, Sparkles } from 'lucide-react';
 import { activities, contextColours, contextLabels } from '../../data/activities';
 import { usePastActivities } from '../../hooks/usePastActivities';
@@ -44,6 +44,12 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
   const [dayNumber, setDayNumber] = useState(targetDay ?? 1);
   const [time, setTime] = useState('09:00');
   const [saving, setSaving] = useState(false);
+
+  // Lock body scroll while modal is open
+  useEffect(() => {
+    document.body.style.overflow = 'hidden';
+    return () => { document.body.style.overflow = ''; };
+  }, []);
 
   const filtered = activities.filter(a => {
     const matchCtx = contextFilter === 'all' || a.context === contextFilter;
