@@ -76,15 +76,7 @@ export default function AddActivityModal({ targetDay, targetDate, initialCustomN
       a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.description.toLowerCase().includes(search.toLowerCase());
     return matchCtx && matchEffort && matchSearch;
-  }).sort((a, b) => {
-    const order = { low: 0, medium: 1, high: 2 };
-    const effortDiff = order[a.effort] - order[b.effort];
-    if (effortDiff !== 0) return effortDiff;
-    // Within same effort, shortest duration first (no duration = end)
-    const durA = a.durationMinutes ?? 999;
-    const durB = b.durationMinutes ?? 999;
-    return durA - durB;
-  });
+  }).sort((a, b) => a.effortScore - b.effortScore);
 
   // Past activities filtered by search (if any search term)
   const filteredPast = pastItems.filter(p =>
