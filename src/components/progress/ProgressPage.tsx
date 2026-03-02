@@ -1,9 +1,9 @@
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer
 } from 'recharts';
-import { ArrowRight, ArrowUp, ArrowDown, TrendingUp, Zap, Users, Heart, Smile, BrainCircuit } from 'lucide-react';
+import { ArrowRight, ArrowUp, ArrowDown, TrendingUp, Zap, Users, Heart, Smile, BrainCircuit, ChevronDown, ChevronUp } from 'lucide-react';
 import { useSchedule } from '../../hooks/useSchedule';
 import { activities as allActivities } from '../../data/activities';
 
@@ -35,6 +35,7 @@ function DirectionBadge({ value, label, inverted = false }: { value: number; lab
 export default function ProgressPage() {
   const navigate = useNavigate();
   const { activities, loading, schedule } = useSchedule();
+  const [showCharts, setShowCharts] = useState(false);
 
   const completedActivities = activities.filter(
     a => a.completed &&
@@ -209,83 +210,13 @@ export default function ProgressPage() {
           <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-5 text-center">
             <BrainCircuit size={20} className="mx-auto mb-2 text-[#6A5A9C]" />
             <p className="text-sm text-[#9E9B97] mb-1">Depression</p>
-            <DirectionBadge value={stats!.avgDepChange} label={stats!.avgDepChange < 0 ? 'improved' : 'avg change'} inverted />
+            <DirectionBadge value={stats!.avgDepChange} label={stats!.avgDepChange < 0 ? 'avg improvement' : 'avg change'} inverted />
+            <p className="text-[10px] text-[#ABA8A3] mt-1.5">A lower score means your mood is improving</p>
           </div>
         )}
       </div>
 
-      {/* Consolidated ACE chart: Before vs After for all three dimensions */}
-      <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
-        <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual: ACE scores</h2>
-        <p className="text-xs text-[#9E9B97] mb-2">
-          How your predictions compared to reality across all three dimensions.
-          <span className="ml-1 text-[#5C7A55]">Higher = better.</span>
-        </p>
-        <div className="flex items-center gap-4 mb-4 flex-wrap">
-          {Object.entries(categoryNames).map(([key, { label, colour, lightColour }]) => (
-            <div key={key} className="flex items-center gap-2 text-xs text-[#8A8680]">
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-sm" style={{ background: lightColour }} />
-                <span>Expected</span>
-              </div>
-              <div className="flex items-center gap-1">
-                <div className="w-3 h-3 rounded-sm" style={{ background: colour }} />
-                <span>{label}</span>
-              </div>
-            </div>
-          ))}
-        </div>
-        <ResponsiveContainer width="100%" height={280}>
-          <BarChart data={stats!.chartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
-            <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
-            <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
-            <Tooltip
-              formatter={((value: number, name: string) => {
-                const labels: Record<string, string> = {
-                  preA: 'Expected A', postA: 'Actual A',
-                  preC: 'Expected C', postC: 'Actual C',
-                  preE: 'Expected E', postE: 'Actual E',
-                };
-                return [value, labels[name] ?? name];
-              }) as never}
-              contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
-            />
-            <Bar dataKey="preA" name="preA" fill="#D4C4A8" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="postA" name="postA" fill="#D4A030" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="preC" name="preC" fill="#B8D4B8" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="postC" name="postC" fill="#7D9B76" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="preE" name="preE" fill="#F5D4A0" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="postE" name="postE" fill="#C17C5A" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
-
-      {/* Depression trend chart */}
-      {stats!.depChartData.length > 0 && (
-        <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
-          <h2 className="font-semibold text-[#3D5A4C] mb-1">Depression: before vs after each activity</h2>
-          <p className="text-xs text-[#9E9B97] mb-5">
-            <span className="text-[#5C7A55]">Lower = better.</span> When the bar drops, the activity helped.
-          </p>
-          <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={stats!.depChartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
-              <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
-              <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
-              <Tooltip
-                formatter={((value: number, name: string) => [value, name === 'before' ? 'Before' : 'After']) as never}
-                contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
-              />
-              <Legend formatter={(v) => v === 'before' ? 'Before' : 'After'} wrapperStyle={{ fontSize: 12 }} />
-              <Bar dataKey="before" name="before" fill="#C8B8E8" radius={[4, 4, 0, 0]} />
-              <Bar dataKey="after" name="after" fill="#6A5A9C" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </div>
-      )}
-
-      {/* Insights section */}
+      {/* Insights section — always visible in simple view */}
       {insights && (insights.biggestDrop || insights.topActivities.length > 0) && (
         <div className="space-y-4">
           <h2 className="font-semibold text-[#3D5A4C] text-lg">What's working</h2>
@@ -298,10 +229,10 @@ export default function ProgressPage() {
               <div>
                 <p className="font-semibold text-[#3D5A4C] text-sm">Biggest mood improvement</p>
                 <p className="text-sm text-[#5C7A55] mt-0.5">
-                  After <strong>{insights.biggestDrop.activity.activity_name}</strong>, your depression went
+                  After <strong>{insights.biggestDrop.activity.activity_name}</strong>, your depression score dropped
                   from <strong>{insights.biggestDrop.activity.pre_depression}</strong> to{' '}
                   <strong>{insights.biggestDrop.activity.post_depression}</strong>.
-                  {' '}<ArrowDown size={12} className="inline text-[#5C7A55]" /> This improved.
+                  {' '}<ArrowDown size={12} className="inline text-[#5C7A55]" /> That means your mood improved.
                 </p>
               </div>
             </div>
@@ -332,6 +263,92 @@ export default function ProgressPage() {
             </div>
           )}
         </div>
+      )}
+
+      {/* Detailed charts — collapsed by default */}
+      <div>
+        <button
+          onClick={() => setShowCharts(!showCharts)}
+          className="flex items-center gap-2 text-sm font-semibold text-[#7D9B76] hover:text-[#3D5A4C] transition-colors"
+        >
+          {showCharts ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          {showCharts ? 'Hide detailed charts' : 'See detailed charts'}
+        </button>
+      </div>
+
+      {showCharts && (
+        <>
+          {/* Consolidated ACE chart: Before vs After for all three dimensions */}
+          <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
+            <h2 className="font-semibold text-[#3D5A4C] mb-1">Expected vs actual: ACE scores</h2>
+            <p className="text-xs text-[#9E9B97] mb-2">
+              How your predictions compared to reality across all three dimensions.
+              <span className="ml-1 text-[#5C7A55]">Higher = better.</span>
+            </p>
+            <div className="flex items-center gap-4 mb-4 flex-wrap">
+              {Object.entries(categoryNames).map(([key, { label, colour, lightColour }]) => (
+                <div key={key} className="flex items-center gap-2 text-xs text-[#8A8680]">
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-sm" style={{ background: lightColour }} />
+                    <span>Expected</span>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <div className="w-3 h-3 rounded-sm" style={{ background: colour }} />
+                    <span>{label}</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={stats!.chartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
+                <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
+                <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
+                <Tooltip
+                  formatter={((value: number, name: string) => {
+                    const labels: Record<string, string> = {
+                      preA: 'Expected A', postA: 'Actual A',
+                      preC: 'Expected C', postC: 'Actual C',
+                      preE: 'Expected E', postE: 'Actual E',
+                    };
+                    return [value, labels[name] ?? name];
+                  }) as never}
+                  contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
+                />
+                <Bar dataKey="preA" name="preA" fill="#D4C4A8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="postA" name="postA" fill="#D4A030" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="preC" name="preC" fill="#B8D4B8" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="postC" name="postC" fill="#7D9B76" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="preE" name="preE" fill="#F5D4A0" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="postE" name="postE" fill="#C17C5A" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+
+          {/* Depression trend chart */}
+          {stats!.depChartData.length > 0 && (
+            <div className="bg-white rounded-2xl border border-[#E8E4DE] shadow-sm p-6">
+              <h2 className="font-semibold text-[#3D5A4C] mb-1">Depression: before vs after each activity</h2>
+              <p className="text-xs text-[#9E9B97] mb-5">
+                A drop in score means your mood improved after the activity.
+              </p>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={stats!.depChartData} margin={{ top: 0, right: 0, bottom: 20, left: -20 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EBE3" />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
+                  <Tooltip
+                    formatter={((value: number, name: string) => [value, name === 'before' ? 'Before' : 'After']) as never}
+                    contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
+                  />
+                  <Legend formatter={(v) => v === 'before' ? 'Before' : 'After'} wrapperStyle={{ fontSize: 12 }} />
+                  <Bar dataKey="before" name="before" fill="#C8B8E8" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="after" name="after" fill="#6A5A9C" radius={[4, 4, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </>
       )}
 
       <p className="text-sm text-[#9E9B97] text-center pb-4">

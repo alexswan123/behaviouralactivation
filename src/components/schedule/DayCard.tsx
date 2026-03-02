@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Plus } from 'lucide-react';
 import ActivitySlot from './ActivitySlot';
 import AddActivityModal from './AddActivityModal';
@@ -23,9 +23,21 @@ interface DayCardProps {
 
 export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, onDelete, maxDay }: DayCardProps) {
   const [showModal, setShowModal] = useState(false);
+  const [justAddedId, setJustAddedId] = useState<string | null>(null);
+  const prevIdsRef = useRef(new Set(activities.map(a => a.id)));
   const { weekday, date: dateLabel } = formatDayHeader(date);
   const today = isToday(date);
   const past = isInPast(date);
+
+  // Detect newly added activities
+  useEffect(() => {
+    const prevIds = prevIdsRef.current;
+    const newActivity = activities.find(a => !prevIds.has(a.id));
+    if (newActivity) {
+      setJustAddedId(newActivity.id);
+    }
+    prevIdsRef.current = new Set(activities.map(a => a.id));
+  }, [activities]);
 
   return (
     <>
@@ -90,6 +102,7 @@ export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, 
                 activity={activity}
                 onUpdate={onUpdate}
                 onDelete={onDelete}
+                initialExpanded={activity.id === justAddedId}
               />
             ))
           )}
@@ -99,6 +112,7 @@ export default function DayCard({ dayNumber, date, activities, onAdd, onUpdate, 
       {showModal && (
         <AddActivityModal
           targetDay={dayNumber}
+          targetDate={date}
           onAdd={onAdd}
           onClose={() => setShowModal(false)}
           maxDay={maxDay}
