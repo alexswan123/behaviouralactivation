@@ -48,19 +48,22 @@ export default function AddActivityModal({ targetDay, targetDate, initialCustomN
   const [saving, setSaving] = useState(false);
 
   // Filter past time slots when scheduling for today
+  // After 9pm, treat today like a past day (show all slots for logging)
   const isTodayDate = targetDate ? isToday(targetDate) : false;
+  const isPastLastSlot = isTodayDate && new Date().getHours() >= 21;
+  const filterToday = isTodayDate && !isPastLastSlot;
   const availableSlots = useMemo(() => {
-    if (!isTodayDate) return TIME_SLOTS;
+    if (!filterToday) return TIME_SLOTS;
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
     return TIME_SLOTS.filter(slot => {
       const [h, m] = slot.split(':').map(Number);
       return h * 60 + m >= currentMinutes;
     });
-  }, [isTodayDate]);
-  // Default to next available slot for today, or 09:00 for future days
+  }, [filterToday]);
+  // Default to next available slot for today, or 09:00 otherwise
   const [time, setTime] = useState(() => {
-    if (isTodayDate) return availableSlots[0] ?? '09:00';
+    if (filterToday) return availableSlots[0] ?? '09:00';
     return '09:00';
   });
 
