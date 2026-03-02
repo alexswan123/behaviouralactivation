@@ -10,6 +10,8 @@ export interface CatalogueActivity {
   group: string;
   context: Context;
   effort: Effort;
+  /** Hidden sort score (1-10). Lower = easier. Used for ordering within effort tiers. */
+  effortScore: number;
   durationMinutes?: number;
 }
 
