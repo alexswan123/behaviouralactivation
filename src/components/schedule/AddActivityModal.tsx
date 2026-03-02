@@ -64,7 +64,12 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
     return matchCtx && matchEffort && matchSearch;
   }).sort((a, b) => {
     const order = { low: 0, medium: 1, high: 2 };
-    return order[a.effort] - order[b.effort];
+    const effortDiff = order[a.effort] - order[b.effort];
+    if (effortDiff !== 0) return effortDiff;
+    // Within same effort, shortest duration first (no duration = end)
+    const durA = a.durationMinutes ?? 999;
+    const durB = b.durationMinutes ?? 999;
+    return durA - durB;
   });
 
   // Past activities filtered by search (if any search term)
