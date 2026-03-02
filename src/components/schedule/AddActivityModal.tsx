@@ -41,6 +41,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
   const [customName, setCustomName] = useState(initialCustomName ?? '');
   const [search, setSearch] = useState('');
   const [contextFilter, setContextFilter] = useState<'all' | Context>('all');
+  const [effortFilter, setEffortFilter] = useState<'all' | 'low' | 'quick'>('all');
   const [dayNumber, setDayNumber] = useState(targetDay ?? 1);
   const [time, setTime] = useState('09:00');
   const [saving, setSaving] = useState(false);
@@ -53,10 +54,14 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
 
   const filtered = activities.filter(a => {
     const matchCtx = contextFilter === 'all' || a.context === contextFilter;
+    const matchEffort =
+      effortFilter === 'all' ||
+      (effortFilter === 'low' && a.effort === 'low') ||
+      (effortFilter === 'quick' && a.durationMinutes !== undefined && a.durationMinutes <= 5);
     const matchSearch = search === '' ||
       a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.description.toLowerCase().includes(search.toLowerCase());
-    return matchCtx && matchSearch;
+    return matchCtx && matchEffort && matchSearch;
   });
 
   // Past activities filtered by search (if any search term)
@@ -105,7 +110,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-[#FAF6F0] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-[#DDD8D0]">
+      <div className="bg-[#FAF6F0] rounded-2xl shadow-2xl w-full max-w-lg h-[85vh] sm:h-[80vh] flex flex-col border border-[#DDD8D0]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#DDD8D0] shrink-0 bg-white rounded-t-2xl">
           <h2 className="font-semibold text-[#3D5A4C]">
@@ -145,6 +150,25 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
                   </button>
                 ))}
               </div>
+              <div className="flex gap-1.5 flex-wrap">
+                {([
+                  { value: 'all' as const, label: 'All' },
+                  { value: 'low' as const, label: 'Low effort' },
+                  { value: 'quick' as const, label: '5 min or less' },
+                ]).map(f => (
+                  <button
+                    key={f.value}
+                    onClick={() => setEffortFilter(f.value)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      effortFilter === f.value
+                        ? 'bg-[#3D5A4C] text-white shadow-sm'
+                        : 'bg-[#EDE8E0] text-[#5C5A57] hover:bg-[#E0D8CE]'
+                    }`}
+                  >
+                    {f.label}
+                  </button>
+                ))}
+              </div>
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -165,7 +189,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
             </div>
 
             {/* Activity list */}
-            <div className="overflow-y-auto flex-1 min-h-[40vh] px-5 py-4 space-y-4">
+            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
               {/* Past activities section */}
               {filteredPast.length > 0 && (
                 <div>
