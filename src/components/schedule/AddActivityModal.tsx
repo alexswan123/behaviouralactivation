@@ -30,10 +30,11 @@ const CONTEXT_FILTERS: { value: 'all' | Context; label: string }[] = [
 ];
 
 const TIME_SLOTS = [
-  '07:00', '07:30', '08:00', '08:30', '09:00', '09:30', '10:00', '10:30',
-  '11:00', '11:30', '12:00', '12:30', '13:00', '13:30', '14:00', '14:30',
-  '15:00', '15:30', '16:00', '16:30', '17:00', '17:30', '18:00', '18:30',
-  '19:00', '19:30', '20:00', '20:30', '21:00',
+  '05:00', '05:30', '06:00', '06:30', '07:00', '07:30', '08:00', '08:30',
+  '09:00', '09:30', '10:00', '10:30', '11:00', '11:30', '12:00', '12:30',
+  '13:00', '13:30', '14:00', '14:30', '15:00', '15:30', '16:00', '16:30',
+  '17:00', '17:30', '18:00', '18:30', '19:00', '19:30', '20:00', '20:30',
+  '21:00', '21:30', '22:00', '22:30', '23:00', '23:30',
 ];
 
 export default function AddActivityModal({ targetDay, targetDate, initialCustomName, onAdd, onClose, maxDay }: AddActivityModalProps) {
@@ -47,23 +48,21 @@ export default function AddActivityModal({ targetDay, targetDate, initialCustomN
   const [dayNumber, setDayNumber] = useState(targetDay ?? 1);
   const [saving, setSaving] = useState(false);
 
-  // Filter past time slots when scheduling for today
-  // After 9pm, treat today like a past day (show all slots for logging)
+  // Filter past time slots when scheduling for today; if all passed, show all (logging mode)
   const isTodayDate = targetDate ? isToday(targetDate) : false;
-  const isPastLastSlot = isTodayDate && new Date().getHours() >= 21;
-  const filterToday = isTodayDate && !isPastLastSlot;
   const availableSlots = useMemo(() => {
-    if (!filterToday) return TIME_SLOTS;
+    if (!isTodayDate) return TIME_SLOTS;
     const now = new Date();
     const currentMinutes = now.getHours() * 60 + now.getMinutes();
-    return TIME_SLOTS.filter(slot => {
+    const future = TIME_SLOTS.filter(slot => {
       const [h, m] = slot.split(':').map(Number);
       return h * 60 + m >= currentMinutes;
     });
-  }, [filterToday]);
+    return future.length > 0 ? future : TIME_SLOTS;
+  }, [isTodayDate]);
   // Default to next available slot for today, or 09:00 otherwise
   const [time, setTime] = useState(() => {
-    if (filterToday) return availableSlots[0] ?? '09:00';
+    if (isTodayDate) return availableSlots[0] ?? '09:00';
     return '09:00';
   });
 
@@ -303,21 +302,15 @@ export default function AddActivityModal({ targetDay, targetDate, initialCustomN
                 <Clock size={14} />
                 Time
               </label>
-              {availableSlots.length === 0 ? (
-                <p className="text-sm text-[#9E9B97] py-3">
-                  No more time slots for today — try tomorrow
-                </p>
-              ) : (
-                <select
-                  value={time}
-                  onChange={e => setTime(e.target.value)}
-                  className="w-full border border-[#E8E4DE] rounded-xl px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76]"
-                >
-                  {availableSlots.map(t => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              )}
+              <select
+                value={time}
+                onChange={e => setTime(e.target.value)}
+                className="w-full border border-[#E8E4DE] rounded-xl px-4 py-3 text-[#3D5A4C] focus:outline-none focus:ring-2 focus:ring-[#7D9B76]"
+              >
+                {availableSlots.map(t => (
+                  <option key={t} value={t}>{t}</option>
+                ))}
+              </select>
             </div>
 
             {/* Actions */}
