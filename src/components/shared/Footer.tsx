@@ -130,7 +130,7 @@ export default function Footer() {
                     rel="noopener noreferrer"
                     className="block text-sm text-[#8A8680] hover:text-[#3D5A4C] transition-colors"
                   >
-                    Support
+                    Donate
                   </a>
                 </div>
               </div>

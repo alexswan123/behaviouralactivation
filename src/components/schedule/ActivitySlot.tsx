@@ -1,19 +1,20 @@
 import { useState, useCallback, useRef } from 'react';
-import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart, ArrowRight } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronUp, Clock, Trash2, Zap, Users, Heart } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import ACEScoreInput from './ACEScoreInput';
 import DepressionSlider from './DepressionSlider';
-import { categoryColours, categoryLabels } from '../../data/activities';
+import { categoryColours, categoryLabels, contextColours, contextLabels } from '../../data/activities';
+import { activities as catalogueActivities } from '../../data/activities';
 import type { ScheduledActivity } from '../../lib/types';
 import { track } from '../../lib/analytics';
 
 const encouragingMessages = [
-  'You followed through — that matters.',
-  'You showed up for yourself today.',
-  'Done. That\u2019s one more data point about what works for you.',
-  'You did what you planned. That\u2019s the work.',
-  'Completed. Every activity is information.',
-  'You took action — even when it\u2019s hard, that counts.',
+  'Done.',
+  'Nice one.',
+  'One more in the books.',
+  'Tick.',
+  'That counts.',
+  'Good stuff.',
 ];
 
 interface ActivitySlotProps {
@@ -53,50 +54,96 @@ function showCelebration(
   }, 2000);
 }
 
-function ACECompactSummary({ pre, post }: {
-  pre: { achievement: number | null; connection: number | null; enjoyment: number | null };
-  post?: { achievement: number | null; connection: number | null; enjoyment: number | null };
-}) {
+function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
+  const pre = {
+    achievement: activity.pre_achievement,
+    connection: activity.pre_connection,
+    enjoyment: activity.pre_enjoyment,
+  };
+  const post = {
+    achievement: activity.post_achievement,
+    connection: activity.post_connection,
+    enjoyment: activity.post_enjoyment,
+  };
+
+  // ACE: count how many improved, same, declined
+  const dims = (['achievement', 'connection', 'enjoyment'] as const).map(key => {
+    const preVal = pre[key];
+    const postVal = post[key];
+    if (preVal === null || postVal === null) return 0;
+    return postVal - preVal;
+  });
+  const aceUp = dims.filter(d => d > 0).length;
+  const aceDown = dims.filter(d => d < 0).length;
+
+  // Depression
+  const depPre = activity.pre_depression;
+  const depPost = activity.post_depression;
+  const depDelta = (depPre !== null && depPost !== null) ? depPost - depPre : null;
+
+  // Build a sentence
+  const parts: string[] = [];
+
+  if (aceUp > 0 && aceDown === 0) {
+    parts.push('You felt better than expected');
+  } else if (aceUp === 0 && aceDown > 0) {
+    parts.push('It was harder than expected');
+  } else if (aceUp > 0 && aceDown > 0) {
+    parts.push('Mixed results');
+  } else {
+    parts.push('About what you expected');
+  }
+
+  if (depDelta !== null) {
+    if (depDelta < -10) {
+      parts.push('mood lifted noticeably');
+    } else if (depDelta < 0) {
+      parts.push('mood lifted a bit');
+    } else if (depDelta > 10) {
+      parts.push('mood dipped');
+    } else if (depDelta > 0) {
+      parts.push('mood dipped slightly');
+    }
+  }
+
+  const sentence = parts.join(', ');
+  const overall = (aceUp > aceDown && (depDelta === null || depDelta <= 0))
+    ? 'positive'
+    : (aceDown > aceUp || (depDelta !== null && depDelta > 10))
+      ? 'tough'
+      : 'neutral';
+
   return (
-    <div className="flex items-center gap-3 flex-wrap">
-      {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
-        const preVal = pre[key];
-        const postVal = post?.[key];
-        return (
-          <div key={key} className="flex items-center gap-1.5">
-            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
-              <Icon size={11} style={{ color: colour }} />
-            </div>
-            <span className="text-xs font-semibold text-[#3D5A4C]">
-              {label}:{' '}
-              {preVal ?? '–'}
-              {post !== undefined && (
-                <>
-                  <ArrowRight size={10} className="inline mx-0.5 text-[#ABA8A3]" />
-                  {postVal ?? '–'}
-                </>
-              )}
-            </span>
-          </div>
-        );
-      })}
-    </div>
+    <p className={`text-sm ${
+      overall === 'positive' ? 'text-[#3D5A4C]' :
+      overall === 'tough' ? 'text-[#8A8680]' :
+      'text-[#5C5A57]'
+    }`}>
+      {sentence}.
+    </p>
   );
 }
 
-function DepressionCompactSummary({ pre, post }: { pre: number | null; post?: number | null }) {
+function ScoresSummary({ activity, timing }: { activity: ScheduledActivity; timing: 'before' | 'after' }) {
+  const prefix = timing === 'before' ? 'pre' : 'post';
   return (
-    <div className="flex items-center gap-1.5">
-      <span className="text-xs font-medium text-[#6A5A9C]">
-        Depression:{' '}
-        <span className="font-semibold">{pre ?? '–'}</span>
-        {post !== undefined && (
-          <>
-            <ArrowRight size={10} className="inline mx-0.5 text-[#ABA8A3]" />
-            <span className="font-semibold">{post ?? '–'}</span>
-          </>
-        )}
-      </span>
+    <div className="flex items-center gap-3 flex-wrap">
+      {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => {
+        const val = activity[`${prefix}_${key}` as keyof ScheduledActivity] as number | null;
+        return (
+          <div key={key} className="flex items-center gap-1">
+            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
+              <Icon size={11} style={{ color: colour }} />
+            </div>
+            <span className="text-xs font-semibold text-[#3D5A4C]">{val ?? '–'}</span>
+          </div>
+        );
+      })}
+      {(activity[`${prefix}_depression` as keyof ScheduledActivity] as number | null) !== null && (
+        <span className="text-xs font-medium text-[#6A5A9C]">
+          Depression: {activity[`${prefix}_depression` as keyof ScheduledActivity] as number}
+        </span>
+      )}
     </div>
   );
 }
@@ -115,10 +162,24 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   const [fullyComplete, setFullyComplete] = useState(isFullyComplete);
   const [preSubmitted, setPreSubmitted] = useState(activity.completed);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'summary' | 'scores' | 'editBefore' | 'editAfter'>('summary');
   const doneButtonRef = useRef<HTMLButtonElement>(null);
   const completeButtonRef = useRef<HTMLButtonElement>(null);
 
-  const colours = activity.category ? categoryColours[activity.category] : null;
+  // Look up catalogue activity to get context for badge colours
+  const catalogueEntry = activity.catalogue_id
+    ? catalogueActivities.find(c => c.id === activity.catalogue_id)
+    : null;
+  const colours = catalogueEntry
+    ? contextColours[catalogueEntry.context]
+    : activity.category
+      ? categoryColours[activity.category]
+      : null;
+  const badgeLabel = catalogueEntry
+    ? contextLabels[catalogueEntry.context]
+    : activity.category
+      ? categoryLabels[activity.category!]
+      : null;
 
   const preScores = {
     achievement: activity.pre_achievement,
@@ -210,12 +271,12 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
               <Clock size={11} />
               {activity.scheduled_time}
             </span>
-            {colours && (
+            {colours && badgeLabel && (
               <span
                 className="px-2 py-0.5 rounded-md text-xs font-semibold"
                 style={{ background: colours.bg, color: colours.text, border: `1px solid ${colours.border}` }}
               >
-                {categoryLabels[activity.category!]}
+                {badgeLabel}
               </span>
             )}
           </div>
@@ -232,31 +293,136 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
       {expanded && (
         <div className="px-4 pb-4 space-y-5 border-t border-[#EDE8E0] pt-4">
 
-          {/* STATE 3: Fully complete — compact summary */}
+          {/* STATE 3: Fully complete */}
           {fullyComplete ? (
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
-                Results
-              </p>
-              <div className="rounded-lg bg-white border border-[#E8E4DE] p-3 space-y-2">
-                <DepressionCompactSummary
-                  pre={activity.pre_depression ?? null}
-                  post={activity.post_depression ?? null}
-                />
-                <ACECompactSummary pre={preScores} post={postScores} />
-              </div>
-              {activity.notes && (
-                <div>
-                  <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
-                  <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
-                </div>
+              {viewMode === 'summary' && (
+                <>
+                  <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
+                    Results
+                  </p>
+                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-3">
+                    <ResultsSummary activity={activity} />
+                  </div>
+                  {activity.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
+                      <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    View scores
+                  </button>
+                </>
               )}
-              <button
-                onClick={() => setFullyComplete(false)}
-                className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
-              >
-                Edit scores & notes
-              </button>
+
+              {viewMode === 'scores' && (
+                <>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">Before</p>
+                      <button
+                        onClick={() => { setViewMode('editBefore'); }}
+                        className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                      <ScoresSummary activity={activity} timing="before" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">After</p>
+                      <button
+                        onClick={() => { setViewMode('editAfter'); }}
+                        className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                      <ScoresSummary activity={activity} timing="after" />
+                    </div>
+                  </div>
+                  {activity.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
+                      <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setViewMode('summary')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Back to summary
+                  </button>
+                </>
+              )}
+
+              {viewMode === 'editBefore' && (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
+                      Edit before scores
+                    </p>
+                    <DepressionSlider
+                      timing="before"
+                      value={activity.pre_depression ?? null}
+                      onChange={v => onUpdate(activity.id, { pre_depression: v })}
+                    />
+                    <div className="mt-3">
+                      <ACEScoreInput values={preScores} onChange={handlePreChange} />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Done editing
+                  </button>
+                </>
+              )}
+
+              {viewMode === 'editAfter' && (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
+                      Edit after scores
+                    </p>
+                    <DepressionSlider
+                      timing="after"
+                      value={activity.post_depression ?? null}
+                      onChange={v => onUpdate(activity.id, { post_depression: v })}
+                    />
+                    <div className="mt-3">
+                      <ACEScoreInput values={postScores} onChange={handlePostChange} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-2">
+                      Notes (optional)
+                    </p>
+                    <textarea
+                      defaultValue={activity.notes ?? ''}
+                      onBlur={e => handleNotesChange(e.target.value)}
+                      placeholder="How did it go? Any observations..."
+                      rows={2}
+                      className="w-full border border-[#E8E4DE] rounded-xl px-3 py-2.5 text-sm text-[#3D5A4C] placeholder:text-[#C8C4BE] focus:outline-none focus:ring-2 focus:ring-[#7D9B76] resize-none"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Done editing
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -293,9 +459,8 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                       Edit
                     </button>
                   </div>
-                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5 space-y-1.5">
-                    <DepressionCompactSummary pre={activity.pre_depression ?? null} />
-                    <ACECompactSummary pre={preScores} />
+                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                    <ScoresSummary activity={activity} timing="before" />
                   </div>
                 </div>
               )}
