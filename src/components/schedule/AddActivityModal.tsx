@@ -110,7 +110,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
 
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/40 backdrop-blur-sm">
-      <div className="bg-[#FAF6F0] rounded-2xl shadow-2xl w-full max-w-lg h-[85vh] sm:h-[80vh] flex flex-col border border-[#DDD8D0]">
+      <div className="bg-[#FAF6F0] rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] flex flex-col border border-[#DDD8D0]">
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#DDD8D0] shrink-0 bg-white rounded-t-2xl">
           <h2 className="font-semibold text-[#3D5A4C]">
@@ -189,7 +189,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
             </div>
 
             {/* Activity list */}
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+            <div className="overflow-y-auto flex-1 min-h-[50vh] px-5 py-4 space-y-4">
               {/* Past activities section */}
               {filteredPast.length > 0 && (
                 <div>
