@@ -124,22 +124,24 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
   );
 }
 
-function BeforeScoresSummary({ activity }: { activity: ScheduledActivity }) {
+function ScoresSummary({ activity, timing }: { activity: ScheduledActivity; timing: 'before' | 'after' }) {
+  const prefix = timing === 'before' ? 'pre' : 'post';
   return (
     <div className="flex items-center gap-3 flex-wrap">
-      {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => (
-        <div key={key} className="flex items-center gap-1">
-          <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
-            <Icon size={11} style={{ color: colour }} />
+      {ACE_DIMENSIONS.map(({ key, icon: Icon, colour, bg }) => {
+        const val = activity[`${prefix}_${key}` as keyof ScheduledActivity] as number | null;
+        return (
+          <div key={key} className="flex items-center gap-1">
+            <div className="w-5 h-5 rounded flex items-center justify-center shrink-0" style={{ background: bg }}>
+              <Icon size={11} style={{ color: colour }} />
+            </div>
+            <span className="text-xs font-semibold text-[#3D5A4C]">{val ?? '–'}</span>
           </div>
-          <span className="text-xs font-semibold text-[#3D5A4C]">
-            {activity[`pre_${key}` as keyof ScheduledActivity] as number | null ?? '–'}
-          </span>
-        </div>
-      ))}
-      {activity.pre_depression !== null && (
+        );
+      })}
+      {(activity[`${prefix}_depression` as keyof ScheduledActivity] as number | null) !== null && (
         <span className="text-xs font-medium text-[#6A5A9C]">
-          Dep: {activity.pre_depression}
+          Dep: {activity[`${prefix}_depression` as keyof ScheduledActivity] as number}
         </span>
       )}
     </div>
@@ -160,6 +162,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
   const [fullyComplete, setFullyComplete] = useState(isFullyComplete);
   const [preSubmitted, setPreSubmitted] = useState(activity.completed);
   const [celebrationMessage, setCelebrationMessage] = useState<string | null>(null);
+  const [viewMode, setViewMode] = useState<'summary' | 'scores' | 'editBefore' | 'editAfter'>('summary');
   const doneButtonRef = useRef<HTMLButtonElement>(null);
   const completeButtonRef = useRef<HTMLButtonElement>(null);
 
@@ -290,27 +293,136 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
       {expanded && (
         <div className="px-4 pb-4 space-y-5 border-t border-[#EDE8E0] pt-4">
 
-          {/* STATE 3: Fully complete — compact summary */}
+          {/* STATE 3: Fully complete */}
           {fullyComplete ? (
             <div className="space-y-3">
-              <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
-                Results
-              </p>
-              <div className="rounded-lg bg-white border border-[#E8E4DE] p-3">
-                <ResultsSummary activity={activity} />
-              </div>
-              {activity.notes && (
-                <div>
-                  <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
-                  <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
-                </div>
+              {viewMode === 'summary' && (
+                <>
+                  <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">
+                    Results
+                  </p>
+                  <div className="rounded-lg bg-white border border-[#E8E4DE] p-3">
+                    <ResultsSummary activity={activity} />
+                  </div>
+                  {activity.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
+                      <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    View scores
+                  </button>
+                </>
               )}
-              <button
-                onClick={() => setFullyComplete(false)}
-                className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
-              >
-                Edit scores & notes
-              </button>
+
+              {viewMode === 'scores' && (
+                <>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">Before</p>
+                      <button
+                        onClick={() => { setViewMode('editBefore'); }}
+                        className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                      <ScoresSummary activity={activity} timing="before" />
+                    </div>
+                  </div>
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide">After</p>
+                      <button
+                        onClick={() => { setViewMode('editAfter'); }}
+                        className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                      >
+                        Edit
+                      </button>
+                    </div>
+                    <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
+                      <ScoresSummary activity={activity} timing="after" />
+                    </div>
+                  </div>
+                  {activity.notes && (
+                    <div>
+                      <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-1">Notes</p>
+                      <p className="text-sm text-[#3D5A4C]">{activity.notes}</p>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => setViewMode('summary')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Back to summary
+                  </button>
+                </>
+              )}
+
+              {viewMode === 'editBefore' && (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
+                      Edit before scores
+                    </p>
+                    <DepressionSlider
+                      timing="before"
+                      value={activity.pre_depression ?? null}
+                      onChange={v => onUpdate(activity.id, { pre_depression: v })}
+                    />
+                    <div className="mt-3">
+                      <ACEScoreInput values={preScores} onChange={handlePreChange} />
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Done editing
+                  </button>
+                </>
+              )}
+
+              {viewMode === 'editAfter' && (
+                <>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-3">
+                      Edit after scores
+                    </p>
+                    <DepressionSlider
+                      timing="after"
+                      value={activity.post_depression ?? null}
+                      onChange={v => onUpdate(activity.id, { post_depression: v })}
+                    />
+                    <div className="mt-3">
+                      <ACEScoreInput values={postScores} onChange={handlePostChange} />
+                    </div>
+                  </div>
+                  <div>
+                    <p className="text-xs font-semibold text-[#9E9B97] uppercase tracking-wide mb-2">
+                      Notes (optional)
+                    </p>
+                    <textarea
+                      defaultValue={activity.notes ?? ''}
+                      onBlur={e => handleNotesChange(e.target.value)}
+                      placeholder="How did it go? Any observations..."
+                      rows={2}
+                      className="w-full border border-[#E8E4DE] rounded-xl px-3 py-2.5 text-sm text-[#3D5A4C] placeholder:text-[#C8C4BE] focus:outline-none focus:ring-2 focus:ring-[#7D9B76] resize-none"
+                    />
+                  </div>
+                  <button
+                    onClick={() => setViewMode('scores')}
+                    className="text-xs text-[#ABA8A3] hover:text-[#3D5A4C] transition-colors"
+                  >
+                    Done editing
+                  </button>
+                </>
+              )}
             </div>
           ) : (
             <>
@@ -348,7 +460,7 @@ export default function ActivitySlot({ activity, onUpdate, onDelete, initialExpa
                     </button>
                   </div>
                   <div className="rounded-lg bg-white border border-[#E8E4DE] p-2.5">
-                    <BeforeScoresSummary activity={activity} />
+                    <ScoresSummary activity={activity} timing="before" />
                   </div>
                 </div>
               )}
