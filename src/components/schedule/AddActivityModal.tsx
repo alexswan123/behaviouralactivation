@@ -159,7 +159,7 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
             </div>
 
             {/* Activity list */}
-            <div className="overflow-y-auto flex-1 px-5 py-4 space-y-4">
+            <div className="overflow-y-auto flex-1 min-h-[40vh] px-5 py-4 space-y-4">
               {/* Past activities section */}
               {filteredPast.length > 0 && (
                 <div>
