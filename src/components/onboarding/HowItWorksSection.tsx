@@ -136,11 +136,12 @@ export default function HowItWorksSection() {
         </div>
         <p className="text-[#5C5A57] mb-4">
           People use Bloom differently, and that's fine. Some plan their week ahead.
-          Others fill it in on the day. Some skip days. All of that works.
+          Others fill it in on the day. What matters most is doing at least one
+          thing each day — even if it's small, even if it's low-effort.
         </p>
         <p className="text-[#5C5A57] mb-4">
-          There's no wrong way to do this. The only thing that matters is doing
-          <em> something</em>, even small, even imperfect.
+          On tough days, pick something that takes five minutes or less.
+          That still counts as a win.
         </p>
         <div className="bg-[#FAF6F0] rounded-xl p-4 border border-[#E8E4DE]">
           <p className="text-sm text-[#5C5A57]">
