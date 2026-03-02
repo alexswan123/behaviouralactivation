@@ -62,6 +62,9 @@ export default function AddActivityModal({ targetDay, initialCustomName, onAdd, 
       a.name.toLowerCase().includes(search.toLowerCase()) ||
       a.description.toLowerCase().includes(search.toLowerCase());
     return matchCtx && matchEffort && matchSearch;
+  }).sort((a, b) => {
+    const order = { low: 0, medium: 1, high: 2 };
+    return order[a.effort] - order[b.effort];
   });
 
   // Past activities filtered by search (if any search term)
