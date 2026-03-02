@@ -88,7 +88,7 @@ export default function WelcomePage() {
       </div>
 
       {/* ACE Quick explainer */}
-      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-16 px-4">
+      <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-16 px-4 max-w-md mx-auto">
         {[
           { icon: Zap, label: 'Achievement', colour: 'bg-[#FFF0DC] text-[#7B4A10]', desc: 'Getting things done' },
           { icon: Users, label: 'Connection', colour: 'bg-[#D8EDD8] text-[#2D5A3A]', desc: 'Feeling close to others' },
@@ -98,8 +98,8 @@ export default function WelcomePage() {
             <div className={`w-10 h-10 rounded-xl flex items-center justify-center mx-auto mb-3 ${colour}`}>
               <Icon size={20} />
             </div>
-            <p className="font-semibold text-[#3D5A4C] text-sm">{label}</p>
-            <p className="text-[#9E9B97] text-xs mt-1">{desc}</p>
+            <p className="font-semibold text-[#3D5A4C] text-xs sm:text-sm">{label}</p>
+            <p className="text-[#9E9B97] text-[10px] sm:text-xs mt-1">{desc}</p>
           </div>
         ))}
       </div>
