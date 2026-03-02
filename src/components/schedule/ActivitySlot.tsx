@@ -72,7 +72,7 @@ function ACECompactSummary({ pre, post }: {
       {ACE_DIMENSIONS.map(({ key, label, icon: Icon, colour, bg }) => {
         const preVal = pre[key];
         const postVal = post?.[key];
-        const delta = (preVal !== null && postVal !== null) ? postVal - preVal : null;
+        const delta = (preVal !== null && postVal !== null && postVal !== undefined) ? postVal - preVal : null;
         const improved = delta !== null && delta > 0;
         const declined = delta !== null && delta < 0;
         return (
@@ -99,7 +99,7 @@ function ACECompactSummary({ pre, post }: {
                 </>
               )}
             </span>
-            {post !== undefined && postVal !== null && (
+            {post !== undefined && postVal !== null && postVal !== undefined && (
               <MiniBar value={postVal} colour={colour} />
             )}
           </div>

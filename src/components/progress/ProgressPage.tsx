@@ -241,14 +241,14 @@ export default function ProgressPage() {
             <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
             <YAxis domain={[0, 10]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
             <Tooltip
-              formatter={(value: number, name: string) => {
+              formatter={((value: number, name: string) => {
                 const labels: Record<string, string> = {
                   preA: 'Expected A', postA: 'Actual A',
                   preC: 'Expected C', postC: 'Actual C',
                   preE: 'Expected E', postE: 'Actual E',
                 };
                 return [value, labels[name] ?? name];
-              }}
+              }) as never}
               contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
             />
             <Bar dataKey="preA" name="preA" fill="#D4C4A8" radius={[4, 4, 0, 0]} />
@@ -274,7 +274,7 @@ export default function ProgressPage() {
               <XAxis dataKey="name" tick={{ fontSize: 11, fill: '#9E9B97' }} angle={-30} textAnchor="end" />
               <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#9E9B97' }} />
               <Tooltip
-                formatter={(value: number, name: string) => [value, name === 'before' ? 'Before' : 'After']}
+                formatter={((value: number, name: string) => [value, name === 'before' ? 'Before' : 'After']) as never}
                 contentStyle={{ borderRadius: 8, border: '1px solid #E8E4DE', fontSize: 12 }}
               />
               <Legend formatter={(v) => v === 'before' ? 'Before' : 'After'} wrapperStyle={{ fontSize: 12 }} />
