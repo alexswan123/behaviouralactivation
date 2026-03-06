@@ -22,14 +22,7 @@ export async function showNotification(activityName: string, minutesBefore: numb
   if (!hasPermission()) return;
   const body = `${activityName} starts in ${minutesBefore} minutes`;
 
-  // Use service worker notification when available (required for iOS PWA)
-  if ('serviceWorker' in navigator) {
-    const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification('Bloom', { body, icon: '/icon-192.png' });
-    return;
-  }
-
-  const n = new Notification('Bloom', { body, icon: '/favicon.svg' });
+  const n = new Notification('Bloom', { body, icon: '/icon-192.png' });
   n.onclick = () => {
     window.focus();
     n.close();
