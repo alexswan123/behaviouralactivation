@@ -95,7 +95,7 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
       sentence = 'You got more out of this than you expected.';
       overall = 'positive';
     } else if (aceNetDown) {
-      sentence = "This was harder than expected. That happens — showing up still counts.";
+      sentence = "This was harder than expected. That happens. Showing up still counts.";
       overall = 'tough';
     } else {
       sentence = 'About what you expected.';
@@ -105,7 +105,7 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
     sentence = 'You rated this higher than you expected, and your mood improved too.';
     overall = 'positive';
   } else if (aceNetUp && depWorsened) {
-    sentence = "You got more out of this than you expected. Even though your mood didn\u2019t shift, that\u2019s common \u2014 depression can make it hard to see the progress you\u2019re making.";
+    sentence = "You got more out of this than you expected. Even though your mood didn\u2019t shift, that\u2019s common. Depression can make it hard to see the progress you\u2019re making.";
     overall = 'neutral';
   } else if (aceNetDown && depImproved) {
     sentence = "This was harder than expected, but your mood still improved. That\u2019s worth noticing.";
@@ -119,7 +119,7 @@ function ResultsSummary({ activity }: { activity: ScheduledActivity }) {
     overall = 'positive';
   } else if (aceNetDown) {
     // ACE down, depression unchanged
-    sentence = "This was harder than expected. That\u2019s okay — not every activity will land the same way.";
+    sentence = "This was harder than expected. That\u2019s okay. Not every activity will land the same way.";
     overall = 'tough';
   } else if (depImproved) {
     // ACE neutral, depression improved

@@ -502,7 +502,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
   );
 
   return (
-    <Document title={`Bloom — My 10-Day ${spell.programme}`} author="Bloom">
+    <Document title={`Bloom: My 10-Day ${spell.programme}`} author="Bloom">
       {/* Pages 1+: header + stats + all 10 days (auto-paginated) */}
       <Page size="A4" style={s.page}>
         <View style={s.coverHeader}>
@@ -511,7 +511,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
             <Text style={s.coverSubtitle}>My 10-Day {spell.programme}</Text>
           </View>
           <View style={{ alignItems: 'flex-end' }}>
-            <Text style={s.coverMetaLabel}>{startLabel} — {endLabel}</Text>
+            <Text style={s.coverMetaLabel}>{startLabel} to {endLabel}</Text>
             <Text style={s.coverMetaValue}>{completedCount} of {totalPlanned} activities completed</Text>
           </View>
         </View>
@@ -523,7 +523,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
               {lifts.map(({ label, val }) => (
                 <View key={label} style={s.statBox}>
                   <Text style={[s.statValue, val && val.startsWith('+') ? s.statValuePos : {}]}>
-                    {val ?? '—'}
+                    {val ?? '-'}
                   </Text>
                   <Text style={s.statLabel}>{label}</Text>
                 </View>
@@ -555,7 +555,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
         </View>
 
         {/* Before & after the programme — wellbeing check */}
-        <Text style={[s.sectionHeading, { marginBottom: 8 }]}>How I felt — before &amp; after the program</Text>
+        <Text style={[s.sectionHeading, { marginBottom: 8 }]}>How I felt: before &amp; after the program</Text>
         <View style={[s.twoCol, { marginBottom: 16 }]}>
           {(['Before the program', 'After the program'] as const).map(label => (
             <View key={label} style={s.wellbeingCard}>
@@ -598,7 +598,7 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
         <View style={s.phqBox}>
           <View style={s.phqBoxHeader}>
             <Text style={s.phqBoxHeaderText}>PHQ-9 Depression Score Tracker</Text>
-            <Text style={s.phqBoxHeaderSub}>Patient Health Questionnaire — 9 items · Score 0–27 · Complete with your healthcare provider</Text>
+            <Text style={s.phqBoxHeaderSub}>Patient Health Questionnaire, 9 items · Score 0–27 · Complete with your healthcare provider</Text>
           </View>
           <View style={s.phqBoxBody}>
             {/* Scale bands */}
@@ -711,11 +711,11 @@ export default function SchedulePDF({ schedule, activities }: SchedulePDFProps) 
           </View>
           <View style={s.insightBody}>
             {[
-              'Share this document with your therapist, GP, or mental health worker — the ACE lift data can help guide next steps.',
+              'Share this document with your therapist, GP, or mental health worker. The ACE lift data can help guide next steps.',
               'Consider repeating a PHQ-9 every 2–4 weeks to track progress over time.',
               'Activities that scored well on post-ACE ratings are strong candidates to build into a regular routine.',
               'If mood remains low despite activity, discuss medication or intensity of support with your provider.',
-              'Behavioural activation works best when built on gradually — even 1–2 activities per week is a meaningful start.',
+              'Behavioural activation works best when built on gradually. Even 1–2 activities per week is a meaningful start.',
             ].map((tip, i) => (
               <View key={i} style={s.bulletRow}>
                 <Text style={s.bullet}>·</Text>

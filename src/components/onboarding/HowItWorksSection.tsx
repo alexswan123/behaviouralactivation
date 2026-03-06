@@ -137,7 +137,7 @@ export default function HowItWorksSection() {
         <p className="text-[#5C5A57] mb-4">
           People use Bloom differently, and that's fine. Some plan their week ahead.
           Others fill it in on the day. What matters most is doing at least one
-          thing each day — even if it's small, even if it's low-effort.
+          thing each day, even if it's small, even if it's low-effort.
         </p>
         <p className="text-[#5C5A57] mb-4">
           On tough days, pick something that takes five minutes or less.

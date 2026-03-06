@@ -401,7 +401,7 @@ export default function SchedulePage() {
             </div>
             <div className="p-6 space-y-4">
               {quickFillCount === 0 ? (
-                <p className="text-sm text-[#8A8680]">All days already have activities — nothing to fill.</p>
+                <p className="text-sm text-[#8A8680]">All days already have activities. Nothing to fill.</p>
               ) : (
                 <>
                   <p className="text-sm text-[#8A8680]">

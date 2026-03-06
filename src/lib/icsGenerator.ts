@@ -56,10 +56,10 @@ export function googleCalendarUrl(act: ScheduledActivity): string {
   const descParts: string[] = [];
   if (act.category) descParts.push(`Category: ${act.category.charAt(0).toUpperCase() + act.category.slice(1)}`);
   if (act.pre_achievement !== null || act.pre_connection !== null || act.pre_enjoyment !== null) {
-    descParts.push(`Expected — A:${act.pre_achievement ?? '–'} C:${act.pre_connection ?? '–'} E:${act.pre_enjoyment ?? '–'}`);
+    descParts.push(`Expected: A:${act.pre_achievement ?? '–'} C:${act.pre_connection ?? '–'} E:${act.pre_enjoyment ?? '–'}`);
   }
   if (act.notes) descParts.push(`Notes: ${act.notes}`);
-  descParts.push('Added by Bloom — behavioural activation');
+  descParts.push('Added by Bloom, behavioural activation');
 
   const params = new URLSearchParams({
     action: 'TEMPLATE',
@@ -85,11 +85,11 @@ export function generateICS(_schedule: Schedule, activities: ScheduledActivity[]
     if (act.category) descParts.push(`Category: ${act.category.charAt(0).toUpperCase() + act.category.slice(1)}`);
     const hasPre = act.pre_achievement !== null || act.pre_connection !== null || act.pre_enjoyment !== null;
     if (hasPre) {
-      descParts.push(`Expected — A:${act.pre_achievement ?? '–'}  C:${act.pre_connection ?? '–'}  E:${act.pre_enjoyment ?? '–'}`);
+      descParts.push(`Expected: A:${act.pre_achievement ?? '–'}  C:${act.pre_connection ?? '–'}  E:${act.pre_enjoyment ?? '–'}`);
     }
     if (act.notes) descParts.push(`Notes: ${act.notes}`);
     descParts.push('');
-    descParts.push('Added by Bloom — behavioural activation');
+    descParts.push('Added by Bloom, behavioural activation');
     const description = escapeText(descParts.join('\n'));
 
     const uid = `${act.id}@bloom-ba`;
@@ -117,7 +117,7 @@ export function generateICS(_schedule: Schedule, activities: ScheduledActivity[]
     ].filter(Boolean).join('\r\n');
   });
 
-  const calName = `Bloom — My ${programmeName}`;
+  const calName = `Bloom: My ${programmeName}`;
 
   const lines = [
     'BEGIN:VCALENDAR',
